@@ -32,7 +32,8 @@ Build a complete AUV simulation demonstrating autonomous underwater navigation. 
 **Plans**: TBD
 
 Plans:
-- [ ] 01-01: TBD
+- [x] 01-01: Docker infrastructure (Dockerfile, docker-compose.yml, helper scripts)
+- [ ] 01-02: ROS2 workspace and Stonefish integration
 
 ### Phase 2: Navigation
 **Goal**: C++ EKF state estimator fusing DVL, IMU, and depth sensors
@@ -104,7 +105,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Infrastructure | 0/TBD | Not started | - |
+| 1. Infrastructure | 1/2 | In progress | - |
 | 2. Navigation | 0/TBD | Not started | - |
 | 3. Control | 0/TBD | Not started | - |
 | 4. Planning | 0/TBD | Not started | - |
