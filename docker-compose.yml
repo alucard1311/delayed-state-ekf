@@ -1,0 +1,57 @@
+# Stonefish AUV Simulation - Docker Compose Configuration
+#
+# Provides X11 forwarding for visualization and NVIDIA GPU access for OpenGL rendering.
+#
+# Prerequisites:
+#   1. NVIDIA Container Toolkit installed
+#   2. Run: xhost +local:docker (before starting)
+#
+# Usage:
+#   docker-compose up        # Start container (foreground)
+#   docker-compose up -d     # Start container (background)
+#   docker-compose down      # Stop container
+
+services:
+  stonefish:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: stonefish-auv:latest
+    container_name: stonefish-auv
+
+    # Network mode: host simplifies ROS2 DDS discovery
+    network_mode: host
+
+    # IPC mode: host allows shared memory for ROS2
+    ipc: host
+
+    # Required for GPU access
+    privileged: true
+
+    # Environment variables
+    environment:
+      - DISPLAY=${DISPLAY}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+
+    # Volume mounts
+    volumes:
+      # X11 socket for display
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      # X authority file for authentication
+      - ${XAUTHORITY:-${HOME}/.Xauthority}:/root/.Xauthority:rw
+      # Mount local src directory for development
+      - ./src:/ros2_ws/src:rw
+
+    # NVIDIA GPU access
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu, graphics, compute, utility]
+
+    # Keep container running
+    stdin_open: true
+    tty: true
