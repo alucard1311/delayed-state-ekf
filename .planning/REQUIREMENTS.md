@@ -86,37 +86,37 @@ Which phases cover which requirements. Updated by create-roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| NAV-01 | — | Pending |
-| NAV-02 | — | Pending |
-| NAV-03 | — | Pending |
-| NAV-04 | — | Pending |
-| NAV-05 | — | Pending |
-| CTRL-01 | — | Pending |
-| CTRL-02 | — | Pending |
-| CTRL-03 | — | Pending |
-| CTRL-04 | — | Pending |
-| CTRL-05 | — | Pending |
-| PLAN-01 | — | Pending |
-| PLAN-02 | — | Pending |
-| PLAN-03 | — | Pending |
-| PLAN-04 | — | Pending |
-| SM-01 | — | Pending |
-| SM-02 | — | Pending |
-| SM-03 | — | Pending |
-| SM-04 | — | Pending |
-| DEMO-01 | — | Pending |
-| DEMO-02 | — | Pending |
-| DEMO-03 | — | Pending |
-| DEMO-04 | — | Pending |
-| INFRA-01 | — | Pending |
-| INFRA-02 | — | Pending |
-| INFRA-03 | — | Pending |
-| INFRA-04 | — | Pending |
+| INFRA-01 | Phase 1 | Pending |
+| INFRA-02 | Phase 1 | Pending |
+| INFRA-03 | Phase 1 | Pending |
+| INFRA-04 | Phase 1 | Pending |
+| NAV-01 | Phase 2 | Pending |
+| NAV-02 | Phase 2 | Pending |
+| NAV-03 | Phase 2 | Pending |
+| NAV-04 | Phase 2 | Pending |
+| NAV-05 | Phase 2 | Pending |
+| CTRL-01 | Phase 3 | Pending |
+| CTRL-02 | Phase 3 | Pending |
+| CTRL-03 | Phase 3 | Pending |
+| CTRL-04 | Phase 3 | Pending |
+| CTRL-05 | Phase 3 | Pending |
+| PLAN-01 | Phase 4 | Pending |
+| PLAN-02 | Phase 4 | Pending |
+| PLAN-03 | Phase 4 | Pending |
+| PLAN-04 | Phase 4 | Pending |
+| SM-01 | Phase 4 | Pending |
+| SM-02 | Phase 4 | Pending |
+| SM-03 | Phase 4 | Pending |
+| SM-04 | Phase 4 | Pending |
+| DEMO-01 | Phase 5 | Pending |
+| DEMO-02 | Phase 5 | Pending |
+| DEMO-03 | Phase 5 | Pending |
+| DEMO-04 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 26 total
-- Mapped to phases: 0 (pending create-roadmap)
-- Unmapped: 26
+- Mapped to phases: 26
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-01-17*
