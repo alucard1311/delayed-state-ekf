@@ -141,26 +141,67 @@ void ControlNode::velocityCmdCallback(const std_msgs::msg::Float64::SharedPtr ms
 }
 
 void ControlNode::controlLoop() {
-  // Early return if no EKF data received yet
+  // Skip if no EKF data yet
   if (!ekf_received_) {
     return;
   }
 
-  // STUB: Controllers will be implemented in Plan 03-02
-  // For now, just log state periodically for debugging
-  static int log_counter = 0;
-  if (++log_counter >= 250) {  // Log every 5 seconds at 50Hz
-    RCLCPP_INFO(this->get_logger(),
-        "State: depth=%.2f m, heading=%.2f rad, velocity=%.2f m/s",
-        current_depth_, current_heading_, current_velocity_);
-    RCLCPP_INFO(this->get_logger(),
-        "Target: depth=%.2f m, heading=%.2f rad, velocity=%.2f m/s",
-        target_depth_, target_heading_, target_velocity_);
-    log_counter = 0;
+  // Calculate dt
+  auto now = this->now();
+  double dt = (now - last_control_time_).seconds();
+  last_control_time_ = now;
+
+  // Skip on first run or if dt is invalid
+  if (dt <= 0.0 || dt > 1.0) {
+    return;
   }
 
-  // TODO (Plan 03-02): Implement depth, heading, and velocity controllers
-  // TODO (Plan 03-02): Publish thruster commands
+  std_msgs::msg::Float64 msg;
+
+  // ===== DEPTH CONTROL (Z -> heave) =====
+  if (depth_control_enabled_) {
+    // Error: positive when we need to go deeper
+    // In NED: positive Z is down, positive heave force pushes down
+    double depth_error = target_depth_ - current_depth_;
+    double heave_cmd = depth_pid_->compute(depth_error, dt);
+
+    msg.data = heave_cmd;
+    heave_pub_->publish(msg);
+  }
+
+  // ===== HEADING CONTROL (yaw -> yaw_bow, yaw_stern) =====
+  if (heading_control_enabled_) {
+    // Error with angle wrapping
+    double heading_error = wrapAngle(target_heading_ - current_heading_);
+    double yaw_cmd = heading_pid_->compute(heading_error, dt);
+
+    // Bow and stern thrusters work together for pure yaw
+    // Bow pushes one way, stern pushes opposite (stern is inverted in XML)
+    // So we send same command to both
+    msg.data = yaw_cmd;
+    yaw_bow_pub_->publish(msg);
+    yaw_stern_pub_->publish(msg);
+  }
+
+  // ===== VELOCITY CONTROL (vx -> surge) =====
+  if (velocity_control_enabled_) {
+    double velocity_error = target_velocity_ - current_velocity_;
+    double surge_cmd = velocity_pid_->compute(velocity_error, dt);
+
+    msg.data = surge_cmd;
+    surge_pub_->publish(msg);
+  }
+
+  // Log state periodically (every 50 cycles = 1 second)
+  static int log_counter = 0;
+  if (++log_counter >= 50) {
+    log_counter = 0;
+    RCLCPP_INFO(this->get_logger(),
+        "State: depth=%.2f (target=%.2f), heading=%.2f (target=%.2f), vel=%.2f (target=%.2f)",
+        current_depth_, target_depth_,
+        current_heading_, target_heading_,
+        current_velocity_, target_velocity_);
+  }
 }
 
 double ControlNode::quaternionToYaw(double x, double y, double z, double w) {
