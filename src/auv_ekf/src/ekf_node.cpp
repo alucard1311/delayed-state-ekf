@@ -12,6 +12,9 @@ constexpr double ATMOSPHERIC_PRESSURE = 101325.0;  // Pa
 constexpr double WATER_DENSITY = 1025.0;           // kg/m³ (seawater)
 constexpr double GRAVITY = 9.81;                   // m/s²
 
+// Sensor timeout for dead reckoning detection
+constexpr double SENSOR_TIMEOUT = 1.0;  // seconds
+
 EkfNode::EkfNode()
 : Node("ekf_node"),
   state_(Eigen::VectorXd::Zero(STATE_SIZE)),
@@ -20,7 +23,8 @@ EkfNode::EkfNode()
   initialized_(false),
   R_imu_(Eigen::MatrixXd::Zero(6, 6)),
   R_pressure_(Eigen::MatrixXd::Zero(1, 1)),
-  R_dvl_(Eigen::MatrixXd::Zero(3, 3))
+  R_dvl_(Eigen::MatrixXd::Zero(3, 3)),
+  dead_reckoning_mode_(false)
 {
   // Declare parameters with defaults
   this->declare_parameter("initial_covariance.position", 1.0);
@@ -65,6 +69,8 @@ EkfNode::EkfNode()
   R_dvl_.diagonal() << 0.01, 0.01, 0.01;
 
   // Initialize sensor timing (will be updated on first callback)
+  last_imu_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
+  last_pressure_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
   last_dvl_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
 
   // Create publisher for pose estimate
@@ -134,6 +140,9 @@ void EkfNode::predict()
     return;
   }
 
+  // Check sensor health and update dead reckoning mode
+  checkSensorHealth();
+
   // Calculate time delta
   rclcpp::Time current_time = this->now();
   double dt = (current_time - last_predict_time_).seconds();
@@ -201,7 +210,9 @@ void EkfNode::predict()
   F(YAW, WZ) = dt;
 
   // Covariance prediction: P = F * P * F^T + Q
-  covariance_ = F * covariance_ * F.transpose() + process_noise_ * dt;
+  // Increase process noise during dead reckoning to reflect increased uncertainty
+  double noise_multiplier = dead_reckoning_mode_ ? 2.0 : 1.0;
+  covariance_ = F * covariance_ * F.transpose() + process_noise_ * dt * noise_multiplier;
 
   // Update time
   last_predict_time_ = current_time;
@@ -316,6 +327,41 @@ void EkfNode::quaternionToEuler(double qx, double qy, double qz, double qw,
   yaw = std::atan2(siny_cosp, cosy_cosp);
 }
 
+void EkfNode::checkSensorHealth()
+{
+  auto now = this->now();
+
+  // Check if each sensor has timed out
+  // Note: A time of 0 means no measurement received yet, treat as not timed out
+  // to avoid spurious warnings on startup
+  bool imu_ok = (last_imu_time_.nanoseconds() == 0) ||
+                (now - last_imu_time_).seconds() < SENSOR_TIMEOUT;
+  bool pressure_ok = (last_pressure_time_.nanoseconds() == 0) ||
+                     (now - last_pressure_time_).seconds() < SENSOR_TIMEOUT;
+  bool dvl_ok = (last_dvl_time_.nanoseconds() == 0) ||
+                (now - last_dvl_time_).seconds() < SENSOR_TIMEOUT;
+
+  // Track previous state for logging transitions
+  bool was_dead_reckoning = dead_reckoning_mode_;
+
+  // Enter dead reckoning if any sensor has timed out (after receiving at least one message)
+  bool sensors_received = last_imu_time_.nanoseconds() > 0 ||
+                          last_pressure_time_.nanoseconds() > 0 ||
+                          last_dvl_time_.nanoseconds() > 0;
+  dead_reckoning_mode_ = sensors_received && (!imu_ok || !pressure_ok || !dvl_ok);
+
+  // Log state transitions
+  if (dead_reckoning_mode_ && !was_dead_reckoning) {
+    RCLCPP_WARN(this->get_logger(),
+                "Entering dead reckoning mode - sensors: IMU=%s, Pressure=%s, DVL=%s",
+                imu_ok ? "OK" : "TIMEOUT",
+                pressure_ok ? "OK" : "TIMEOUT",
+                dvl_ok ? "OK" : "TIMEOUT");
+  } else if (!dead_reckoning_mode_ && was_dead_reckoning) {
+    RCLCPP_INFO(this->get_logger(), "Exiting dead reckoning mode - all sensors OK");
+  }
+}
+
 void EkfNode::measurementUpdate(const Eigen::VectorXd& z, const Eigen::MatrixXd& H,
                                  const Eigen::MatrixXd& R)
 {
@@ -368,6 +414,9 @@ void EkfNode::imuCallback(const sensor_msgs::msg::Imu::SharedPtr msg)
     return;
   }
 
+  // Update IMU timing for dead reckoning detection
+  last_imu_time_ = this->now();
+
   // Extract orientation quaternion and convert to Euler
   double roll, pitch, yaw;
   quaternionToEuler(msg->orientation.x, msg->orientation.y,
@@ -403,6 +452,9 @@ void EkfNode::pressureCallback(const sensor_msgs::msg::FluidPressure::SharedPtr 
   if (!initialized_) {
     return;
   }
+
+  // Update pressure timing for dead reckoning detection
+  last_pressure_time_ = this->now();
 
   // Calculate depth from pressure
   // depth = (pressure - atmospheric_pressure) / (water_density * gravity)

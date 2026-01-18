@@ -67,7 +67,12 @@ private:
   Eigen::MatrixXd R_dvl_;       // 3x3 for velocity (vx, vy, vz)
 
   // Sensor timing for dead reckoning detection
+  rclcpp::Time last_imu_time_;
+  rclcpp::Time last_pressure_time_;
   rclcpp::Time last_dvl_time_;
+
+  // Dead reckoning state
+  bool dead_reckoning_mode_;
 
   // Parameters
   double initial_covariance_position_;
@@ -84,6 +89,7 @@ private:
   void initializeState();
   void predict();
   void publishState();
+  void checkSensorHealth();
 
   // Sensor callbacks
   void imuCallback(const sensor_msgs::msg::Imu::SharedPtr msg);
