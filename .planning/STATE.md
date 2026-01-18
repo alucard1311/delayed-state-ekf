@@ -5,29 +5,30 @@
 See: .planning/PROJECT.md (updated 2026-01-17)
 
 **Core value:** Full vertical slice — one complete mission (dive → waypoint → surface) with all layers working
-**Current focus:** Phase 1 complete → ready for Phase 2 (Navigation)
+**Current focus:** Phase 2 in progress — EKF core package complete, sensor updates next
 
 ## Current Position
 
-Phase: 1 of 5 (Infrastructure) — COMPLETE
-Plan: 2 of 2 in current phase — COMPLETE
-Status: Phase complete, ready for next phase
-Last activity: 2026-01-17 — Completed 01-02-PLAN.md (ROS2 + Stonefish integration)
+Phase: 2 of 5 (Navigation)
+Plan: 1 of 4 in current phase
+Status: In progress
+Last activity: 2026-01-18 — Completed 02-01-PLAN.md (EKF core package)
 
-Progress: ██████████ 20% (1 of 5 phases)
+Progress: ██████████████░░░░░░ 30% (3 of 10 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: ~15min (including debugging)
-- Total execution time: ~30 min
+- Total plans completed: 3
+- Average duration: ~10min
+- Total execution time: ~33 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Status |
 |-------|-------|-------|--------|
 | 01-infrastructure | 2/2 | ~30min | Complete |
+| 02-navigation | 1/4 | ~3min | In progress |
 
 ## Accumulated Context
 
@@ -44,6 +45,9 @@ Recent decisions affecting current work:
 | 01-02 | AUV_Composite material (950 kg/m³) | Provides positive buoyancy |
 | 01-02 | Push-type actuators | Simple virtual force, no mesh needed |
 | 01-02 | Sensors added early | IMU, DVL, Pressure, Odometry ready for Phase 2 EKF |
+| 02-01 | 12-state EKF vector | Position, velocity, orientation, angular velocity for full 6-DOF |
+| 02-01 | 50Hz prediction rate | Faster than slowest sensor (DVL at 10Hz) |
+| 02-01 | ZYX Euler convention | Standard for aerospace/underwater navigation |
 
 ### Pending Todos
 
@@ -51,11 +55,11 @@ None.
 
 ### Blockers/Concerns
 
-None — infrastructure phase complete and verified.
+None — EKF core ready for sensor fusion.
 
 ## Session Continuity
 
-Last session: 2026-01-17
-Stopped at: Completed Phase 1 (Infrastructure)
+Last session: 2026-01-18
+Stopped at: Completed 02-01-PLAN.md (EKF core package)
 Resume file: None
-Next action: Plan Phase 2 (Navigation - EKF)
+Next action: Execute 02-02-PLAN.md (IMU update)

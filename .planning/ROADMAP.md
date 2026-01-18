@@ -50,7 +50,10 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 02-01: TBD
+- [x] 02-01: EKF core package (state vector, prediction model)
+- [ ] 02-02: IMU measurement update
+- [ ] 02-03: DVL measurement update
+- [ ] 02-04: Depth sensor measurement update
 
 ### Phase 3: Control
 **Goal**: C++ PID controllers for depth, heading, and velocity
@@ -106,7 +109,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Infrastructure | 2/2 | Complete | 2026-01-17 |
-| 2. Navigation | 0/TBD | Not started | - |
+| 2. Navigation | 1/4 | In progress | - |
 | 3. Control | 0/TBD | Not started | - |
 | 4. Planning | 0/TBD | Not started | - |
 | 5. Demo | 0/TBD | Not started | - |
