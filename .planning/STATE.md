@@ -5,30 +5,30 @@
 See: .planning/PROJECT.md (updated 2026-01-17)
 
 **Core value:** Full vertical slice — one complete mission (dive → waypoint → surface) with all layers working
-**Current focus:** Phase 2 in progress — IMU and pressure sensor fusion added, DVL next
+**Current focus:** Phase 2 in progress — Full sensor fusion (IMU, pressure, DVL) with dead reckoning
 
 ## Current Position
 
 Phase: 2 of 5 (Navigation)
-Plan: 2 of 4 in current phase
+Plan: 3 of 4 in current phase
 Status: In progress
-Last activity: 2026-01-18 — Completed 02-02-PLAN.md (IMU and pressure updates)
+Last activity: 2026-01-18 — Completed 02-03-PLAN.md (DVL update and dead reckoning)
 
-Progress: ████████████████░░░░ 40% (4 of 10 plans)
+Progress: ██████████████████░░ 50% (5 of 10 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: ~9min
-- Total execution time: ~36 min
+- Total plans completed: 5
+- Average duration: ~8min
+- Total execution time: ~41 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Status |
 |-------|-------|-------|--------|
 | 01-infrastructure | 2/2 | ~30min | Complete |
-| 02-navigation | 2/4 | ~6min | In progress |
+| 02-navigation | 3/4 | ~11min | In progress |
 
 ## Accumulated Context
 
@@ -50,6 +50,9 @@ Recent decisions affecting current work:
 | 02-01 | ZYX Euler convention | Standard for aerospace/underwater navigation |
 | 02-02 | Generic measurementUpdate() | Reusable for any sensor with H matrix pattern |
 | 02-02 | Remove stonefish_ros2 dep | EKF only uses standard ROS message types |
+| 02-03 | Re-add stonefish_ros2 dep | Required for DVL message type |
+| 02-03 | SENSOR_TIMEOUT = 1.0 second | Reasonable timeout for dead reckoning detection |
+| 02-03 | 2x process noise in dead reckoning | Reflects uncertainty without destabilizing filter |
 
 ### Pending Todos
 
@@ -57,11 +60,11 @@ None.
 
 ### Blockers/Concerns
 
-None — EKF fuses IMU and pressure data, ready for DVL.
+None — EKF fuses all sensors with dead reckoning fallback.
 
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 02-02-PLAN.md (IMU and pressure updates)
+Stopped at: Completed 02-03-PLAN.md (DVL update and dead reckoning)
 Resume file: None
-Next action: Execute 02-03-PLAN.md (DVL update)
+Next action: Execute 02-04-PLAN.md (depth sensor update)
