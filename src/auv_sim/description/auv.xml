@@ -1,7 +1,10 @@
 <?xml version="1.0"?>
 <!--
   Stonefish scenario definition for AUV simulation
-  Defines underwater environment and basic AUV with 4 thrusters
+  Defines underwater environment, AUV with push actuators and sensors
+  
+  Sensors: IMU, DVL, Pressure (depth), Odometry (ground truth)
+  Actuators: Push (virtual force actuators)
 -->
 
 <scenario>
@@ -11,7 +14,6 @@
             <water density="1025.0" jerlov="0.2" temperature="15.0"/>
             <waves height="0.0"/>
             <particles enabled="true"/>
-            <!-- No current initially - can be added for testing -->
         </ocean>
         <atmosphere>
             <sun azimuth="45.0" elevation="60.0"/>
@@ -21,9 +23,13 @@
     <materials>
         <material name="Aluminium" density="2710.0" restitution="0.7"/>
         <material name="Polyurethane" density="1100.0" restitution="0.5"/>
+        <!-- AUV composite: simulates hull with syntactic foam for near-neutral buoyancy -->
+        <!-- Slightly less than water (1025) for gentle positive buoyancy -->
+        <material name="AUV_Composite" density="950.0" restitution="0.5"/>
         <friction_table>
             <friction material1="Aluminium" material2="Aluminium" static="0.7" dynamic="0.4"/>
             <friction material1="Polyurethane" material2="Polyurethane" static="0.6" dynamic="0.3"/>
+            <friction material1="AUV_Composite" material2="AUV_Composite" static="0.5" dynamic="0.3"/>
         </friction_table>
     </materials>
 
@@ -39,7 +45,7 @@
         <base_link name="base_link" type="cylinder" physics="submerged" buoyant="true">
             <dimensions radius="0.15" height="1.5"/>
             <origin xyz="0.0 0.0 0.0" rpy="0.0 1.5708 0.0"/>
-            <material name="Aluminium"/>
+            <material name="AUV_Composite"/>
             <look name="AUV_Hull"/>
             <compound_transform xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
         </base_link>
@@ -48,7 +54,7 @@
         <link name="bow" type="sphere" physics="submerged" buoyant="true">
             <dimensions radius="0.15"/>
             <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-            <material name="Polyurethane"/>
+            <material name="AUV_Composite"/>
             <look name="AUV_Hull"/>
         </link>
 
@@ -62,7 +68,7 @@
         <link name="stern" type="sphere" physics="submerged" buoyant="true">
             <dimensions radius="0.15"/>
             <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-            <material name="Polyurethane"/>
+            <material name="AUV_Composite"/>
             <look name="AUV_Hull"/>
         </link>
 
@@ -72,103 +78,93 @@
             <origin xyz="-0.75 0.0 0.0" rpy="0.0 0.0 0.0"/>
         </joint>
 
-        <!-- Thrusters for 4-DOF control -->
+        <!-- ================================================================ -->
+        <!-- SENSORS -->
+        <!-- ================================================================ -->
 
-        <!-- Surge thruster (main propulsion) - rear facing -->
-        <actuator name="thruster_surge" type="thruster">
-            <specs max_setpoint="100.0" inverted_setpoint="false" normalized_setpoint="true"/>
-            <propeller diameter="0.1" right="true">
-                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-                <material name="Aluminium"/>
-                <look name="Thruster"/>
-            </propeller>
-            <rotor_dynamics type="first_order">
-                <time_constant value="0.1"/>
-            </rotor_dynamics>
-            <thrust_model type="quadratic">
-                <thrust_coeff forward="0.5" reverse="0.3"/>
-                <torque_coeff value="0.01"/>
-            </thrust_model>
-            <origin xyz="-0.9 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <!-- IMU - Inertial Measurement Unit (orientation, angular velocity, acceleration) -->
+        <sensor name="imu" rate="100.0" type="imu">
+            <range angular_velocity="10.0 10.0 10.0" linear_acceleration="100.0"/>
+            <noise angle="0.01 0.01 0.05" angular_velocity="0.01" yaw_drift="0.0001" linear_acceleration="0.05"/>
+            <history samples="1"/>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
             <link name="base_link"/>
+            <ros_publisher topic="/auv/imu"/>
+        </sensor>
+
+        <!-- DVL - Doppler Velocity Log (velocity relative to seabed) -->
+        <sensor name="dvl" rate="10.0" type="dvl">
+            <specs beam_angle="30.0" beam_positive_z="true"/>
+            <range velocity="10.0 10.0 5.0" altitude_min="0.5" altitude_max="100.0"/>
+            <noise velocity_percent="0.3" velocity="0.01" altitude="0.01"/>
+            <history samples="1"/>
+            <origin xyz="0.0 0.0 0.1" rpy="0.0 0.0 0.0"/>
+            <link name="base_link"/>
+            <ros_publisher topic="/auv/dvl"/>
+        </sensor>
+
+        <!-- Pressure sensor (for depth measurement) -->
+        <sensor name="pressure" rate="10.0" type="pressure">
+            <range pressure="1000000.0"/>
+            <noise pressure="100.0"/>
+            <history samples="1"/>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <link name="base_link"/>
+            <ros_publisher topic="/auv/pressure"/>
+        </sensor>
+
+        <!-- Odometry (ground truth for debugging/comparison) -->
+        <sensor name="odometry" rate="50.0" type="odometry">
+            <noise position="0.0" velocity="0.0" angle="0.0" angular_velocity="0.0"/>
+            <history samples="1"/>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <link name="base_link"/>
+            <ros_publisher topic="/auv/odometry"/>
+        </sensor>
+
+        <!-- ================================================================ -->
+        <!-- ACTUATORS (Push type - virtual force actuators) -->
+        <!-- ================================================================ -->
+        
+        <!-- Surge force (main propulsion) - applies force along X-axis -->
+        <actuator name="thruster_surge" type="push">
+            <specs lower_limit="-100.0" upper_limit="100.0" inverted="false"/>
+            <origin xyz="-0.75 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <link name="base_link"/>
+            <ros_subscriber topic="/auv/thruster/surge"/>
         </actuator>
 
-        <!-- Sway thruster (lateral movement) -->
-        <actuator name="thruster_sway" type="thruster">
-            <specs max_setpoint="50.0" inverted_setpoint="false" normalized_setpoint="true"/>
-            <propeller diameter="0.08" right="true">
-                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-                <material name="Aluminium"/>
-                <look name="Thruster"/>
-            </propeller>
-            <rotor_dynamics type="first_order">
-                <time_constant value="0.1"/>
-            </rotor_dynamics>
-            <thrust_model type="quadratic">
-                <thrust_coeff forward="0.3" reverse="0.2"/>
-                <torque_coeff value="0.01"/>
-            </thrust_model>
+        <!-- Sway force (lateral movement) - applies force along Y-axis -->
+        <actuator name="thruster_sway" type="push">
+            <specs lower_limit="-50.0" upper_limit="50.0" inverted="false"/>
             <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 1.5708"/>
             <link name="base_link"/>
+            <ros_subscriber topic="/auv/thruster/sway"/>
         </actuator>
 
-        <!-- Heave thruster (vertical movement) -->
-        <actuator name="thruster_heave" type="thruster">
-            <specs max_setpoint="50.0" inverted_setpoint="false" normalized_setpoint="true"/>
-            <propeller diameter="0.08" right="true">
-                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-                <material name="Aluminium"/>
-                <look name="Thruster"/>
-            </propeller>
-            <rotor_dynamics type="first_order">
-                <time_constant value="0.1"/>
-            </rotor_dynamics>
-            <thrust_model type="quadratic">
-                <thrust_coeff forward="0.3" reverse="0.2"/>
-                <torque_coeff value="0.01"/>
-            </thrust_model>
-            <origin xyz="0.0 0.0 0.0" rpy="0.0 1.5708 0.0"/>
+        <!-- Heave force (vertical movement) - applies force along Z-axis -->
+        <actuator name="thruster_heave" type="push">
+            <specs lower_limit="-50.0" upper_limit="50.0" inverted="false"/>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 -1.5708 0.0"/>
             <link name="base_link"/>
+            <ros_subscriber topic="/auv/thruster/heave"/>
         </actuator>
 
-        <!-- Yaw thrusters (rotation) - bow and stern pair -->
-        <actuator name="thruster_yaw_bow" type="thruster">
-            <specs max_setpoint="30.0" inverted_setpoint="false" normalized_setpoint="true"/>
-            <propeller diameter="0.06" right="true">
-                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-                <material name="Aluminium"/>
-                <look name="Thruster"/>
-            </propeller>
-            <rotor_dynamics type="first_order">
-                <time_constant value="0.1"/>
-            </rotor_dynamics>
-            <thrust_model type="quadratic">
-                <thrust_coeff forward="0.2" reverse="0.15"/>
-                <torque_coeff value="0.005"/>
-            </thrust_model>
+        <!-- Yaw force (bow) - for rotation control -->
+        <actuator name="thruster_yaw_bow" type="push">
+            <specs lower_limit="-30.0" upper_limit="30.0" inverted="false"/>
             <origin xyz="0.5 0.0 0.0" rpy="0.0 0.0 1.5708"/>
             <link name="base_link"/>
+            <ros_subscriber topic="/auv/thruster/yaw_bow"/>
         </actuator>
 
-        <actuator name="thruster_yaw_stern" type="thruster">
-            <specs max_setpoint="30.0" inverted_setpoint="true" normalized_setpoint="true"/>
-            <propeller diameter="0.06" right="false">
-                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-                <material name="Aluminium"/>
-                <look name="Thruster"/>
-            </propeller>
-            <rotor_dynamics type="first_order">
-                <time_constant value="0.1"/>
-            </rotor_dynamics>
-            <thrust_model type="quadratic">
-                <thrust_coeff forward="0.2" reverse="0.15"/>
-                <torque_coeff value="0.005"/>
-            </thrust_model>
+        <!-- Yaw force (stern) - for rotation control -->
+        <actuator name="thruster_yaw_stern" type="push">
+            <specs lower_limit="-30.0" upper_limit="30.0" inverted="true"/>
             <origin xyz="-0.5 0.0 0.0" rpy="0.0 0.0 1.5708"/>
             <link name="base_link"/>
+            <ros_subscriber topic="/auv/thruster/yaw_stern"/>
         </actuator>
-
-        <!-- Sensors (placeholders - to be wired to ROS2 topics in Phase 2) -->
 
         <!-- World transform - start underwater at 5m depth -->
         <world_transform xyz="0.0 0.0 5.0" rpy="0.0 0.0 0.0"/>

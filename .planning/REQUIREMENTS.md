@@ -46,10 +46,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: Stonefish simulator runs in Docker container
-- [ ] **INFRA-02**: ROS2 nodes communicate via defined topic architecture
-- [ ] **INFRA-03**: Docker container supports X11 forwarding for visualization
-- [ ] **INFRA-04**: Single docker-compose command launches full simulation
+- [x] **INFRA-01**: Stonefish simulator runs in Docker container
+- [x] **INFRA-02**: ROS2 nodes communicate via defined topic architecture
+- [x] **INFRA-03**: Docker container supports X11 forwarding for visualization
+- [x] **INFRA-04**: Single docker-compose command launches full simulation
 
 ## v2 Requirements
 
@@ -86,10 +86,10 @@ Which phases cover which requirements. Updated by create-roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 1 | Pending |
-| INFRA-02 | Phase 1 | Pending |
-| INFRA-03 | Phase 1 | Pending |
-| INFRA-04 | Phase 1 | Pending |
+| INFRA-01 | Phase 1 | Complete |
+| INFRA-02 | Phase 1 | Complete |
+| INFRA-03 | Phase 1 | Complete |
+| INFRA-04 | Phase 1 | Complete |
 | NAV-01 | Phase 2 | Pending |
 | NAV-02 | Phase 2 | Pending |
 | NAV-03 | Phase 2 | Pending |
