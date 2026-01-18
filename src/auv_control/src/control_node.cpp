@@ -9,6 +9,10 @@ namespace auv_control {
 
 ControlNode::ControlNode()
     : Node("control_node"),
+      depth_control_enabled_(true),
+      heading_control_enabled_(true),
+      velocity_control_enabled_(true),
+      last_control_time_(this->now()),
       current_depth_(0.0),
       current_heading_(0.0),
       current_velocity_(0.0),
@@ -17,6 +21,46 @@ ControlNode::ControlNode()
       target_depth_(0.0),
       target_heading_(0.0),
       target_velocity_(0.0) {
+  // ===== Declare PID parameters with defaults =====
+
+  // Depth PID gains
+  this->declare_parameter("depth_kp", 20.0);
+  this->declare_parameter("depth_ki", 2.0);
+  this->declare_parameter("depth_kd", 10.0);
+
+  // Heading PID gains
+  this->declare_parameter("heading_kp", 15.0);
+  this->declare_parameter("heading_ki", 1.0);
+  this->declare_parameter("heading_kd", 5.0);
+
+  // Velocity PID gains
+  this->declare_parameter("velocity_kp", 50.0);
+  this->declare_parameter("velocity_ki", 5.0);
+  this->declare_parameter("velocity_kd", 10.0);
+
+  // Control rate
+  this->declare_parameter("control_rate", 50.0);
+
+  // ===== Get parameters =====
+  double depth_kp = this->get_parameter("depth_kp").as_double();
+  double depth_ki = this->get_parameter("depth_ki").as_double();
+  double depth_kd = this->get_parameter("depth_kd").as_double();
+
+  double heading_kp = this->get_parameter("heading_kp").as_double();
+  double heading_ki = this->get_parameter("heading_ki").as_double();
+  double heading_kd = this->get_parameter("heading_kd").as_double();
+
+  double velocity_kp = this->get_parameter("velocity_kp").as_double();
+  double velocity_ki = this->get_parameter("velocity_ki").as_double();
+  double velocity_kd = this->get_parameter("velocity_kd").as_double();
+
+  // ===== Create PID controllers =====
+  // Max outputs match thruster limits, max integral is half for anti-windup
+  // Heave: ±50 N, Yaw: ±30 N, Surge: ±100 N
+  depth_pid_ = std::make_unique<PID>(depth_kp, depth_ki, depth_kd, 50.0, 25.0);
+  heading_pid_ = std::make_unique<PID>(heading_kp, heading_ki, heading_kd, 30.0, 15.0);
+  velocity_pid_ = std::make_unique<PID>(velocity_kp, velocity_ki, velocity_kd, 100.0, 50.0);
+
   // EKF state subscriber
   ekf_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
       "/auv/ekf/pose", 10,
@@ -54,6 +98,12 @@ ControlNode::ControlNode()
   RCLCPP_INFO(this->get_logger(), "Control node initialized");
   RCLCPP_INFO(this->get_logger(), "Subscribing to EKF: /auv/ekf/pose");
   RCLCPP_INFO(this->get_logger(), "Setpoint topics: /auv/cmd/{depth,heading,velocity}");
+  RCLCPP_INFO(this->get_logger(), "Depth PID: kp=%.1f, ki=%.1f, kd=%.1f",
+              depth_kp, depth_ki, depth_kd);
+  RCLCPP_INFO(this->get_logger(), "Heading PID: kp=%.1f, ki=%.1f, kd=%.1f",
+              heading_kp, heading_ki, heading_kd);
+  RCLCPP_INFO(this->get_logger(), "Velocity PID: kp=%.1f, ki=%.1f, kd=%.1f",
+              velocity_kp, velocity_ki, velocity_kd);
 }
 
 void ControlNode::ekfCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
@@ -119,6 +169,17 @@ double ControlNode::quaternionToYaw(double x, double y, double z, double w) {
   double siny_cosp = 2.0 * (w * z + x * y);
   double cosy_cosp = 1.0 - 2.0 * (y * y + z * z);
   return std::atan2(siny_cosp, cosy_cosp);
+}
+
+double ControlNode::wrapAngle(double angle) {
+  // Normalize angle to [-pi, pi]
+  while (angle > M_PI) {
+    angle -= 2.0 * M_PI;
+  }
+  while (angle < -M_PI) {
+    angle += 2.0 * M_PI;
+  }
+  return angle;
 }
 
 }  // namespace auv_control
