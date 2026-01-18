@@ -1,0 +1,31 @@
+# Simulation configuration for AUV Stonefish simulation
+# These parameters can be loaded via ROS2 parameter server if needed
+
+simulation:
+  # Simulation rate in Hz (100 Hz is typical for underwater vehicles)
+  rate: 100.0
+
+  # Rendering quality: low, medium, or high
+  # - low: Best performance, minimal visual fidelity
+  # - medium: Balanced performance and visuals
+  # - high: Best visuals, higher GPU load
+  graphics_quality: "medium"
+
+  # Window resolution
+  window:
+    width: 1280
+    height: 720
+
+# Environment settings (defaults, can be overridden in scenario XML)
+environment:
+  # Water properties
+  water:
+    density: 1025.0  # kg/m^3 (seawater)
+    temperature: 15.0  # Celsius
+
+  # Initial AUV depth
+  initial_depth: 5.0  # meters below surface
+
+# Note: Most simulation parameters are defined in the scenario XML file
+# (src/auv_sim/description/auv.xml). This config file serves as a reference
+# and can be extended for ROS2 parameter loading in future phases.
