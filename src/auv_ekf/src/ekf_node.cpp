@@ -12,9 +12,6 @@ constexpr double ATMOSPHERIC_PRESSURE = 101325.0;  // Pa
 constexpr double WATER_DENSITY = 1025.0;           // kg/m³ (seawater)
 constexpr double GRAVITY = 9.81;                   // m/s²
 
-// Sensor timeout for dead reckoning detection
-constexpr double SENSOR_TIMEOUT = 1.0;  // seconds
-
 EkfNode::EkfNode()
 : Node("ekf_node"),
   state_(Eigen::VectorXd::Zero(STATE_SIZE)),
@@ -26,27 +23,50 @@ EkfNode::EkfNode()
   R_dvl_(Eigen::MatrixXd::Zero(3, 3)),
   dead_reckoning_mode_(false)
 {
-  // Declare parameters with defaults
-  this->declare_parameter("initial_covariance.position", 1.0);
-  this->declare_parameter("initial_covariance.velocity", 0.1);
-  this->declare_parameter("initial_covariance.orientation", 0.1);
-  this->declare_parameter("initial_covariance.angular_velocity", 0.01);
-  this->declare_parameter("process_noise.position", 0.01);
-  this->declare_parameter("process_noise.velocity", 0.1);
-  this->declare_parameter("process_noise.orientation", 0.01);
-  this->declare_parameter("process_noise.angular_velocity", 0.1);
-  this->declare_parameter("prediction_rate", 50.0);
+  // Declare all parameters with defaults (matching ekf_params.yaml)
+  // Prediction rate
+  this->declare_parameter("predict_rate", 50.0);
+
+  // Initial state uncertainty
+  this->declare_parameter("initial_position_uncertainty", 1.0);
+  this->declare_parameter("initial_velocity_uncertainty", 0.5);
+  this->declare_parameter("initial_orientation_uncertainty", 0.1);
+  this->declare_parameter("initial_angular_velocity_uncertainty", 0.1);
+
+  // Process noise (per second)
+  this->declare_parameter("process_noise_position", 0.01);
+  this->declare_parameter("process_noise_velocity", 0.1);
+  this->declare_parameter("process_noise_orientation", 0.001);
+  this->declare_parameter("process_noise_angular_velocity", 0.01);
+
+  // Measurement noise
+  this->declare_parameter("imu_orientation_noise", 0.01);
+  this->declare_parameter("imu_angular_velocity_noise", 0.01);
+  this->declare_parameter("pressure_depth_noise", 0.1);
+  this->declare_parameter("dvl_velocity_noise", 0.01);
+
+  // Dead reckoning
+  this->declare_parameter("sensor_timeout", 1.0);
 
   // Get parameters
-  initial_covariance_position_ = this->get_parameter("initial_covariance.position").as_double();
-  initial_covariance_velocity_ = this->get_parameter("initial_covariance.velocity").as_double();
-  initial_covariance_orientation_ = this->get_parameter("initial_covariance.orientation").as_double();
-  initial_covariance_angular_vel_ = this->get_parameter("initial_covariance.angular_velocity").as_double();
-  process_noise_position_ = this->get_parameter("process_noise.position").as_double();
-  process_noise_velocity_ = this->get_parameter("process_noise.velocity").as_double();
-  process_noise_orientation_ = this->get_parameter("process_noise.orientation").as_double();
-  process_noise_angular_vel_ = this->get_parameter("process_noise.angular_velocity").as_double();
-  prediction_rate_ = this->get_parameter("prediction_rate").as_double();
+  prediction_rate_ = this->get_parameter("predict_rate").as_double();
+
+  initial_covariance_position_ = this->get_parameter("initial_position_uncertainty").as_double();
+  initial_covariance_velocity_ = this->get_parameter("initial_velocity_uncertainty").as_double();
+  initial_covariance_orientation_ = this->get_parameter("initial_orientation_uncertainty").as_double();
+  initial_covariance_angular_vel_ = this->get_parameter("initial_angular_velocity_uncertainty").as_double();
+
+  process_noise_position_ = this->get_parameter("process_noise_position").as_double();
+  process_noise_velocity_ = this->get_parameter("process_noise_velocity").as_double();
+  process_noise_orientation_ = this->get_parameter("process_noise_orientation").as_double();
+  process_noise_angular_vel_ = this->get_parameter("process_noise_angular_velocity").as_double();
+
+  double imu_orient_noise = this->get_parameter("imu_orientation_noise").as_double();
+  double imu_angvel_noise = this->get_parameter("imu_angular_velocity_noise").as_double();
+  double pressure_noise = this->get_parameter("pressure_depth_noise").as_double();
+  double dvl_noise = this->get_parameter("dvl_velocity_noise").as_double();
+
+  sensor_timeout_ = this->get_parameter("sensor_timeout").as_double();
 
   // Initialize process noise matrix Q (diagonal)
   process_noise_.diagonal() <<
@@ -57,16 +77,17 @@ EkfNode::EkfNode()
 
   // Initialize IMU measurement noise R_imu (6x6 diagonal)
   // States: [roll, pitch, yaw, wx, wy, wz]
-  // Orientation noise ~0.01 rad, angular velocity noise ~0.01 rad/s
-  R_imu_.diagonal() << 0.01, 0.01, 0.01, 0.01, 0.01, 0.01;
+  double imu_orient_var = imu_orient_noise * imu_orient_noise;
+  double imu_angvel_var = imu_angvel_noise * imu_angvel_noise;
+  R_imu_.diagonal() << imu_orient_var, imu_orient_var, imu_orient_var,
+                       imu_angvel_var, imu_angvel_var, imu_angvel_var;
 
   // Initialize pressure measurement noise R_pressure (1x1)
-  // Depth noise ~0.1m uncertainty
-  R_pressure_(0, 0) = 0.1 * 0.1;  // Variance = (0.1m)^2
+  R_pressure_(0, 0) = pressure_noise * pressure_noise;  // Variance
 
   // Initialize DVL measurement noise R_dvl (3x3 diagonal)
-  // Velocity noise ~0.01 m/s per axis (typical for DVL)
-  R_dvl_.diagonal() << 0.01, 0.01, 0.01;
+  double dvl_var = dvl_noise * dvl_noise;
+  R_dvl_.diagonal() << dvl_var, dvl_var, dvl_var;
 
   // Initialize sensor timing (will be updated on first callback)
   last_imu_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
@@ -335,11 +356,11 @@ void EkfNode::checkSensorHealth()
   // Note: A time of 0 means no measurement received yet, treat as not timed out
   // to avoid spurious warnings on startup
   bool imu_ok = (last_imu_time_.nanoseconds() == 0) ||
-                (now - last_imu_time_).seconds() < SENSOR_TIMEOUT;
+                (now - last_imu_time_).seconds() < sensor_timeout_;
   bool pressure_ok = (last_pressure_time_.nanoseconds() == 0) ||
-                     (now - last_pressure_time_).seconds() < SENSOR_TIMEOUT;
+                     (now - last_pressure_time_).seconds() < sensor_timeout_;
   bool dvl_ok = (last_dvl_time_.nanoseconds() == 0) ||
-                (now - last_dvl_time_).seconds() < SENSOR_TIMEOUT;
+                (now - last_dvl_time_).seconds() < sensor_timeout_;
 
   // Track previous state for logging transitions
   bool was_dead_reckoning = dead_reckoning_mode_;

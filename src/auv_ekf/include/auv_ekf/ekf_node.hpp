@@ -84,6 +84,7 @@ private:
   double process_noise_orientation_;
   double process_noise_angular_vel_;
   double prediction_rate_;
+  double sensor_timeout_;
 
   // Methods
   void initializeState();
