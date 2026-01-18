@@ -7,12 +7,19 @@
 
 namespace auv_ekf {
 
+// Constants for pressure-to-depth conversion
+constexpr double ATMOSPHERIC_PRESSURE = 101325.0;  // Pa
+constexpr double WATER_DENSITY = 1025.0;           // kg/m³ (seawater)
+constexpr double GRAVITY = 9.81;                   // m/s²
+
 EkfNode::EkfNode()
 : Node("ekf_node"),
   state_(Eigen::VectorXd::Zero(STATE_SIZE)),
   covariance_(Eigen::MatrixXd::Zero(STATE_SIZE, STATE_SIZE)),
   process_noise_(Eigen::MatrixXd::Zero(STATE_SIZE, STATE_SIZE)),
-  initialized_(false)
+  initialized_(false),
+  R_imu_(Eigen::MatrixXd::Zero(6, 6)),
+  R_pressure_(Eigen::MatrixXd::Zero(1, 1))
 {
   // Declare parameters with defaults
   this->declare_parameter("initial_covariance.position", 1.0);
@@ -43,8 +50,26 @@ EkfNode::EkfNode()
     process_noise_orientation_, process_noise_orientation_, process_noise_orientation_,
     process_noise_angular_vel_, process_noise_angular_vel_, process_noise_angular_vel_;
 
+  // Initialize IMU measurement noise R_imu (6x6 diagonal)
+  // States: [roll, pitch, yaw, wx, wy, wz]
+  // Orientation noise ~0.01 rad, angular velocity noise ~0.01 rad/s
+  R_imu_.diagonal() << 0.01, 0.01, 0.01, 0.01, 0.01, 0.01;
+
+  // Initialize pressure measurement noise R_pressure (1x1)
+  // Depth noise ~0.1m uncertainty
+  R_pressure_(0, 0) = 0.1 * 0.1;  // Variance = (0.1m)^2
+
   // Create publisher for pose estimate
   pose_pub_ = this->create_publisher<nav_msgs::msg::Odometry>("/auv/ekf/pose", 10);
+
+  // Create subscribers for sensor data
+  imu_sub_ = this->create_subscription<sensor_msgs::msg::Imu>(
+    "/auv/imu", 10,
+    std::bind(&EkfNode::imuCallback, this, std::placeholders::_1));
+
+  pressure_sub_ = this->create_subscription<sensor_msgs::msg::FluidPressure>(
+    "/auv/pressure", 10,
+    std::bind(&EkfNode::pressureCallback, this, std::placeholders::_1));
 
   // Create prediction timer
   auto period = std::chrono::duration<double>(1.0 / prediction_rate_);
@@ -253,6 +278,136 @@ double EkfNode::normalizeAngle(double angle)
     angle += 2.0 * M_PI;
   }
   return angle;
+}
+
+void EkfNode::quaternionToEuler(double qx, double qy, double qz, double qw,
+                                 double& roll, double& pitch, double& yaw)
+{
+  // Convert quaternion to Euler angles (ZYX convention)
+  // Roll (x-axis rotation)
+  double sinr_cosp = 2.0 * (qw * qx + qy * qz);
+  double cosr_cosp = 1.0 - 2.0 * (qx * qx + qy * qy);
+  roll = std::atan2(sinr_cosp, cosr_cosp);
+
+  // Pitch (y-axis rotation)
+  double sinp = 2.0 * (qw * qy - qz * qx);
+  if (std::abs(sinp) >= 1.0) {
+    // Use 90 degrees if out of range
+    pitch = std::copysign(M_PI / 2.0, sinp);
+  } else {
+    pitch = std::asin(sinp);
+  }
+
+  // Yaw (z-axis rotation)
+  double siny_cosp = 2.0 * (qw * qz + qx * qy);
+  double cosy_cosp = 1.0 - 2.0 * (qy * qy + qz * qz);
+  yaw = std::atan2(siny_cosp, cosy_cosp);
+}
+
+void EkfNode::measurementUpdate(const Eigen::VectorXd& z, const Eigen::MatrixXd& H,
+                                 const Eigen::MatrixXd& R)
+{
+  // Skip if not initialized
+  if (!initialized_) {
+    return;
+  }
+
+  // Innovation (measurement residual): y = z - H * x
+  Eigen::VectorXd y = z - H * state_;
+
+  // Wrap angle innovations for orientation states (indices 0-2 in measurement if present)
+  // Check which states H is selecting by looking at which columns are non-zero
+  for (int i = 0; i < y.size(); ++i) {
+    // Find the state index this measurement corresponds to
+    for (int j = 0; j < STATE_SIZE; ++j) {
+      if (std::abs(H(i, j)) > 0.5) {  // Non-zero element indicates state mapping
+        // If it's an orientation state (ROLL=6, PITCH=7, YAW=8), wrap the innovation
+        if (j >= ROLL && j <= YAW) {
+          y(i) = normalizeAngle(y(i));
+        }
+        break;
+      }
+    }
+  }
+
+  // Innovation covariance: S = H * P * H^T + R
+  Eigen::MatrixXd S = H * covariance_ * H.transpose() + R;
+
+  // Kalman gain: K = P * H^T * S^-1
+  Eigen::MatrixXd K = covariance_ * H.transpose() * S.inverse();
+
+  // State update: x = x + K * y
+  state_ = state_ + K * y;
+
+  // Wrap orientation angles to [-pi, pi]
+  state_(ROLL) = normalizeAngle(state_(ROLL));
+  state_(PITCH) = normalizeAngle(state_(PITCH));
+  state_(YAW) = normalizeAngle(state_(YAW));
+
+  // Covariance update: P = (I - K * H) * P
+  Eigen::MatrixXd I = Eigen::MatrixXd::Identity(STATE_SIZE, STATE_SIZE);
+  covariance_ = (I - K * H) * covariance_;
+}
+
+void EkfNode::imuCallback(const sensor_msgs::msg::Imu::SharedPtr msg)
+{
+  // Skip if not initialized
+  if (!initialized_) {
+    return;
+  }
+
+  // Extract orientation quaternion and convert to Euler
+  double roll, pitch, yaw;
+  quaternionToEuler(msg->orientation.x, msg->orientation.y,
+                    msg->orientation.z, msg->orientation.w,
+                    roll, pitch, yaw);
+
+  // Extract angular velocity
+  double wx = msg->angular_velocity.x;
+  double wy = msg->angular_velocity.y;
+  double wz = msg->angular_velocity.z;
+
+  // Create measurement vector z (6x1): [roll, pitch, yaw, wx, wy, wz]
+  Eigen::VectorXd z(6);
+  z << roll, pitch, yaw, wx, wy, wz;
+
+  // Create measurement matrix H (6x12): maps state to measurement
+  // H selects states [ROLL, PITCH, YAW, WX, WY, WZ]
+  Eigen::MatrixXd H = Eigen::MatrixXd::Zero(6, STATE_SIZE);
+  H(0, ROLL) = 1.0;   // Measurement 0 is roll
+  H(1, PITCH) = 1.0;  // Measurement 1 is pitch
+  H(2, YAW) = 1.0;    // Measurement 2 is yaw
+  H(3, WX) = 1.0;     // Measurement 3 is angular velocity x
+  H(4, WY) = 1.0;     // Measurement 4 is angular velocity y
+  H(5, WZ) = 1.0;     // Measurement 5 is angular velocity z
+
+  // Perform measurement update
+  measurementUpdate(z, H, R_imu_);
+}
+
+void EkfNode::pressureCallback(const sensor_msgs::msg::FluidPressure::SharedPtr msg)
+{
+  // Skip if not initialized
+  if (!initialized_) {
+    return;
+  }
+
+  // Calculate depth from pressure
+  // depth = (pressure - atmospheric_pressure) / (water_density * gravity)
+  // In NED frame, positive Z is DOWN, so depth is positive underwater
+  double pressure = msg->fluid_pressure;
+  double depth = (pressure - ATMOSPHERIC_PRESSURE) / (WATER_DENSITY * GRAVITY);
+
+  // Create measurement vector z (1x1): [depth]
+  Eigen::VectorXd z(1);
+  z << depth;
+
+  // Create measurement matrix H (1x12): H(0, Z) = 1.0, rest zeros
+  Eigen::MatrixXd H = Eigen::MatrixXd::Zero(1, STATE_SIZE);
+  H(0, Z) = 1.0;  // Measurement is depth (Z in NED frame)
+
+  // Perform measurement update
+  measurementUpdate(z, H, R_pressure_);
 }
 
 }  // namespace auv_ekf

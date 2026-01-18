@@ -55,6 +55,14 @@ private:
   // Publisher for state estimate
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pose_pub_;
 
+  // Subscribers for sensor data
+  rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_sub_;
+  rclcpp::Subscription<sensor_msgs::msg::FluidPressure>::SharedPtr pressure_sub_;
+
+  // Measurement noise matrices
+  Eigen::MatrixXd R_imu_;       // 6x6 for orientation + angular velocity
+  Eigen::MatrixXd R_pressure_;  // 1x1 for depth
+
   // Parameters
   double initial_covariance_position_;
   double initial_covariance_velocity_;
@@ -70,6 +78,32 @@ private:
   void initializeState();
   void predict();
   void publishState();
+
+  // Sensor callbacks
+  void imuCallback(const sensor_msgs::msg::Imu::SharedPtr msg);
+  void pressureCallback(const sensor_msgs::msg::FluidPressure::SharedPtr msg);
+
+  /**
+   * @brief Generic EKF measurement update
+   * @param z Measurement vector
+   * @param H Measurement matrix (maps state to measurement)
+   * @param R Measurement noise covariance
+   */
+  void measurementUpdate(const Eigen::VectorXd& z, const Eigen::MatrixXd& H,
+                         const Eigen::MatrixXd& R);
+
+  /**
+   * @brief Convert quaternion to Euler angles (ZYX convention)
+   * @param x Quaternion x component
+   * @param y Quaternion y component
+   * @param z Quaternion z component
+   * @param w Quaternion w component
+   * @param roll Output roll angle in radians
+   * @param pitch Output pitch angle in radians
+   * @param yaw Output yaw angle in radians
+   */
+  void quaternionToEuler(double x, double y, double z, double w,
+                         double& roll, double& pitch, double& yaw);
 
   /**
    * @brief Convert Euler angles to rotation matrix (ZYX convention)

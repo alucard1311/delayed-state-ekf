@@ -20,7 +20,6 @@ find_package(nav_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(Eigen3 REQUIRED)
-find_package(stonefish_ros2 REQUIRED)
 
 # Create library
 add_library(auv_ekf_lib SHARED
@@ -39,7 +38,6 @@ ament_target_dependencies(auv_ekf_lib
   nav_msgs
   tf2
   tf2_ros
-  stonefish_ros2
 )
 
 # Create executable
