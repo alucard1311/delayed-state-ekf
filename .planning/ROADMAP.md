@@ -51,7 +51,7 @@ Plans:
 
 Plans:
 - [x] 02-01: EKF core package (state vector, prediction model)
-- [ ] 02-02: IMU measurement update
+- [x] 02-02: IMU and pressure measurement updates
 - [ ] 02-03: DVL measurement update
 - [ ] 02-04: Depth sensor measurement update
 
@@ -109,7 +109,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Infrastructure | 2/2 | Complete | 2026-01-17 |
-| 2. Navigation | 1/4 | In progress | - |
+| 2. Navigation | 2/4 | In progress | - |
 | 3. Control | 0/TBD | Not started | - |
 | 4. Planning | 0/TBD | Not started | - |
 | 5. Demo | 0/TBD | Not started | - |

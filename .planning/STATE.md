@@ -5,30 +5,30 @@
 See: .planning/PROJECT.md (updated 2026-01-17)
 
 **Core value:** Full vertical slice — one complete mission (dive → waypoint → surface) with all layers working
-**Current focus:** Phase 2 in progress — EKF core package complete, sensor updates next
+**Current focus:** Phase 2 in progress — IMU and pressure sensor fusion added, DVL next
 
 ## Current Position
 
 Phase: 2 of 5 (Navigation)
-Plan: 1 of 4 in current phase
+Plan: 2 of 4 in current phase
 Status: In progress
-Last activity: 2026-01-18 — Completed 02-01-PLAN.md (EKF core package)
+Last activity: 2026-01-18 — Completed 02-02-PLAN.md (IMU and pressure updates)
 
-Progress: ██████████████░░░░░░ 30% (3 of 10 plans)
+Progress: ████████████████░░░░ 40% (4 of 10 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: ~10min
-- Total execution time: ~33 min
+- Total plans completed: 4
+- Average duration: ~9min
+- Total execution time: ~36 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Status |
 |-------|-------|-------|--------|
 | 01-infrastructure | 2/2 | ~30min | Complete |
-| 02-navigation | 1/4 | ~3min | In progress |
+| 02-navigation | 2/4 | ~6min | In progress |
 
 ## Accumulated Context
 
@@ -48,6 +48,8 @@ Recent decisions affecting current work:
 | 02-01 | 12-state EKF vector | Position, velocity, orientation, angular velocity for full 6-DOF |
 | 02-01 | 50Hz prediction rate | Faster than slowest sensor (DVL at 10Hz) |
 | 02-01 | ZYX Euler convention | Standard for aerospace/underwater navigation |
+| 02-02 | Generic measurementUpdate() | Reusable for any sensor with H matrix pattern |
+| 02-02 | Remove stonefish_ros2 dep | EKF only uses standard ROS message types |
 
 ### Pending Todos
 
@@ -55,11 +57,11 @@ None.
 
 ### Blockers/Concerns
 
-None — EKF core ready for sensor fusion.
+None — EKF fuses IMU and pressure data, ready for DVL.
 
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 02-01-PLAN.md (EKF core package)
+Stopped at: Completed 02-02-PLAN.md (IMU and pressure updates)
 Resume file: None
-Next action: Execute 02-02-PLAN.md (IMU update)
+Next action: Execute 02-03-PLAN.md (DVL update)
