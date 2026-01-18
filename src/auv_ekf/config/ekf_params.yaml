@@ -1,0 +1,25 @@
+ekf_node:
+  ros__parameters:
+    # Prediction rate
+    predict_rate: 50.0  # Hz
+
+    # Initial state uncertainty
+    initial_position_uncertainty: 1.0  # meters
+    initial_velocity_uncertainty: 0.5  # m/s
+    initial_orientation_uncertainty: 0.1  # radians
+    initial_angular_velocity_uncertainty: 0.1  # rad/s
+
+    # Process noise (per second)
+    process_noise_position: 0.01  # m^2/s
+    process_noise_velocity: 0.1  # (m/s)^2/s
+    process_noise_orientation: 0.001  # rad^2/s
+    process_noise_angular_velocity: 0.01  # (rad/s)^2/s
+
+    # Measurement noise
+    imu_orientation_noise: 0.01  # radians
+    imu_angular_velocity_noise: 0.01  # rad/s
+    pressure_depth_noise: 0.1  # meters
+    dvl_velocity_noise: 0.01  # m/s
+
+    # Dead reckoning
+    sensor_timeout: 1.0  # seconds
