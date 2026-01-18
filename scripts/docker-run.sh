@@ -30,19 +30,19 @@ echo ""
 # Check for -d flag (detached mode)
 if [[ "$1" == "-d" ]]; then
     echo "Starting container in background..."
-    docker-compose up -d
+    docker compose up -d
     echo ""
     echo "Container started in background."
     echo ""
     echo "Useful commands:"
-    echo "  docker-compose logs -f    # View logs"
-    echo "  docker-compose exec stonefish bash  # Enter container"
-    echo "  docker-compose down       # Stop container"
+    echo "  docker compose logs -f    # View logs"
+    echo "  docker compose exec stonefish bash  # Enter container"
+    echo "  docker compose down       # Stop container"
 else
     echo "Starting container in foreground..."
     echo "(Press Ctrl+C to stop)"
     echo ""
-    docker-compose up
+    docker compose up
 fi
 
 echo ""

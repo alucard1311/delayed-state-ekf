@@ -20,10 +20,10 @@ echo ""
 # Check for --no-cache flag
 if [[ "$1" == "--no-cache" ]]; then
     echo "Building without cache (clean rebuild)..."
-    docker-compose build --no-cache
+    docker compose build --no-cache
 else
     echo "Building with cache..."
-    docker-compose build
+    docker compose build
 fi
 
 echo ""
