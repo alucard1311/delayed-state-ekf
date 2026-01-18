@@ -68,7 +68,9 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 03-01: TBD
+- [x] 03-01: Control package foundation (PID class, control node skeleton)
+- [ ] 03-02: Depth and heading controllers
+- [ ] 03-03: Velocity controller and launch file
 
 ### Phase 4: Planning
 **Goal**: Python mission planner with state machine for autonomous behavior
@@ -110,6 +112,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Infrastructure | 2/2 | Complete | 2026-01-17 |
 | 2. Navigation | 4/4 | Complete | 2026-01-17 |
-| 3. Control | 0/TBD | Not started | - |
+| 3. Control | 1/3 | In progress | - |
 | 4. Planning | 0/TBD | Not started | - |
 | 5. Demo | 0/TBD | Not started | - |

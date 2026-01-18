@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-17)
 
 **Core value:** Full vertical slice — one complete mission (dive → waypoint → surface) with all layers working
-**Current focus:** Phase 2 complete — Ready for Phase 3 (Control)
+**Current focus:** Phase 3 in progress — Control package foundation complete
 
 ## Current Position
 
-Phase: 2 of 5 (Navigation)
-Plan: 4 of 4 in current phase
-Status: Complete
-Last activity: 2026-01-18 — Completed 02-04-PLAN.md (Launch file and EKF verification)
+Phase: 3 of 5 (Control)
+Plan: 1 of 3 in current phase
+Status: In progress
+Last activity: 2026-01-18 — Completed 03-01-PLAN.md (Control package foundation)
 
-Progress: ████████████████████ 60% (6 of 10 plans)
+Progress: ███████████████████████ 70% (7 of 10 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: ~9min
-- Total execution time: ~53 min
+- Total plans completed: 7
+- Average duration: ~8min
+- Total execution time: ~55 min
 
 **By Phase:**
 
@@ -29,6 +29,7 @@ Progress: ████████████████████ 60% (6 of
 |-------|-------|-------|--------|
 | 01-infrastructure | 2/2 | ~30min | Complete |
 | 02-navigation | 4/4 | ~23min | Complete |
+| 03-control | 1/3 | ~2min | In progress |
 
 ## Accumulated Context
 
@@ -55,6 +56,9 @@ Recent decisions affecting current work:
 | 02-03 | 2x process noise in dead reckoning | Reflects uncertainty without destabilizing filter |
 | 02-04 | 50Hz default prediction rate | Faster than slowest sensor, matches IMU rate |
 | 02-04 | Parameter-driven noise matrices | Allows tuning without recompilation |
+| 03-01 | Generic PID class | Reusable for depth, heading, velocity controllers |
+| 03-01 | 50Hz control loop | Matches EKF output rate |
+| 03-01 | Depth = -z convention | Positive depth is below surface |
 
 ### Pending Todos
 
@@ -62,11 +66,11 @@ None.
 
 ### Blockers/Concerns
 
-None — EKF fuses all sensors with dead reckoning fallback.
+None — Control foundation ready for controller implementation.
 
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 02-04-PLAN.md (Launch file and EKF verification)
+Stopped at: Completed 03-01-PLAN.md (Control package foundation)
 Resume file: None
-Next action: Begin Phase 03-control
+Next action: Execute 03-02-PLAN.md (Depth and heading controllers)
