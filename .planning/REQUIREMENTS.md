@@ -9,11 +9,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Navigation
 
-- [ ] **NAV-01**: EKF state estimator fuses DVL velocity measurements for position estimation
-- [ ] **NAV-02**: EKF state estimator fuses IMU data for orientation and angular velocity
-- [ ] **NAV-03**: EKF state estimator fuses depth sensor for vertical position
-- [ ] **NAV-04**: EKF provides filtered state estimate (position, velocity, orientation) to control system
-- [ ] **NAV-05**: EKF handles sensor dropouts gracefully (dead reckoning fallback)
+- [x] **NAV-01**: EKF state estimator fuses DVL velocity measurements for position estimation
+- [x] **NAV-02**: EKF state estimator fuses IMU data for orientation and angular velocity
+- [x] **NAV-03**: EKF state estimator fuses depth sensor for vertical position
+- [x] **NAV-04**: EKF provides filtered state estimate (position, velocity, orientation) to control system
+- [x] **NAV-05**: EKF handles sensor dropouts gracefully (dead reckoning fallback)
 
 ### Control
 
@@ -90,11 +90,11 @@ Which phases cover which requirements. Updated by create-roadmap.
 | INFRA-02 | Phase 1 | Complete |
 | INFRA-03 | Phase 1 | Complete |
 | INFRA-04 | Phase 1 | Complete |
-| NAV-01 | Phase 2 | Pending |
-| NAV-02 | Phase 2 | Pending |
-| NAV-03 | Phase 2 | Pending |
-| NAV-04 | Phase 2 | Pending |
-| NAV-05 | Phase 2 | Pending |
+| NAV-01 | Phase 2 | Complete |
+| NAV-02 | Phase 2 | Complete |
+| NAV-03 | Phase 2 | Complete |
+| NAV-04 | Phase 2 | Complete |
+| NAV-05 | Phase 2 | Complete |
 | CTRL-01 | Phase 3 | Pending |
 | CTRL-02 | Phase 3 | Pending |
 | CTRL-03 | Phase 3 | Pending |

@@ -11,7 +11,7 @@ Build a complete AUV simulation demonstrating autonomous underwater navigation. 
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 - [x] **Phase 1: Infrastructure** - Docker + Stonefish + ROS2 foundation
-- [ ] **Phase 2: Navigation** - C++ EKF state estimator with sensor fusion
+- [x] **Phase 2: Navigation** - C++ EKF state estimator with sensor fusion
 - [ ] **Phase 3: Control** - C++ PID controllers for depth/heading/velocity
 - [ ] **Phase 4: Planning** - Python mission planner + state machine
 - [ ] **Phase 5: Demo** - Full vertical slice mission integration
@@ -53,7 +53,7 @@ Plans:
 - [x] 02-01: EKF core package (state vector, prediction model)
 - [x] 02-02: IMU and pressure measurement updates
 - [x] 02-03: DVL measurement update and dead reckoning
-- [ ] 02-04: Depth sensor measurement update
+- [x] 02-04: Launch file and EKF verification
 
 ### Phase 3: Control
 **Goal**: C++ PID controllers for depth, heading, and velocity
@@ -109,7 +109,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Infrastructure | 2/2 | Complete | 2026-01-17 |
-| 2. Navigation | 3/4 | In progress | - |
+| 2. Navigation | 4/4 | Complete | 2026-01-17 |
 | 3. Control | 0/TBD | Not started | - |
 | 4. Planning | 0/TBD | Not started | - |
 | 5. Demo | 0/TBD | Not started | - |
