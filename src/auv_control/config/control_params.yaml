@@ -1,0 +1,19 @@
+control_node:
+  ros__parameters:
+    # Control rate
+    control_rate: 50.0  # Hz
+
+    # Depth PID gains (output: heave force, max ±50 N)
+    depth_kp: 20.0
+    depth_ki: 2.0
+    depth_kd: 10.0
+
+    # Heading PID gains (output: yaw force, max ±30 N)
+    heading_kp: 15.0
+    heading_ki: 1.0
+    heading_kd: 5.0
+
+    # Velocity PID gains (output: surge force, max ±100 N)
+    velocity_kp: 50.0
+    velocity_ki: 5.0
+    velocity_kd: 10.0
