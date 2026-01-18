@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-17)
 ## Current Position
 
 Phase: 3 of 5 (Control)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In progress
-Last activity: 2026-01-18 — Completed 03-01-PLAN.md (Control package foundation)
+Last activity: 2026-01-18 — Completed 03-02-PLAN.md (PID controllers implementation)
 
-Progress: ███████████████████████ 70% (7 of 10 plans)
+Progress: ████████████████████████ 80% (8 of 10 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: ~8min
-- Total execution time: ~55 min
+- Total plans completed: 8
+- Average duration: ~7min
+- Total execution time: ~57 min
 
 **By Phase:**
 
@@ -29,7 +29,7 @@ Progress: ███████████████████████ 
 |-------|-------|-------|--------|
 | 01-infrastructure | 2/2 | ~30min | Complete |
 | 02-navigation | 4/4 | ~23min | Complete |
-| 03-control | 1/3 | ~2min | In progress |
+| 03-control | 2/3 | ~4min | In progress |
 
 ## Accumulated Context
 
@@ -59,6 +59,9 @@ Recent decisions affecting current work:
 | 03-01 | Generic PID class | Reusable for depth, heading, velocity controllers |
 | 03-01 | 50Hz control loop | Matches EKF output rate |
 | 03-01 | Depth = -z convention | Positive depth is below surface |
+| 03-02 | Angle wrapping for heading | Prevents 270-degree spins on ±pi discontinuity |
+| 03-02 | Same command to bow/stern yaw | Stern is inverted in auv.xml |
+| 03-02 | dt validation in control loop | Skip if dt <= 0 or > 1.0 to avoid PID spikes |
 
 ### Pending Todos
 
@@ -71,6 +74,6 @@ None — Control foundation ready for controller implementation.
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 03-01-PLAN.md (Control package foundation)
+Stopped at: Completed 03-02-PLAN.md (PID controllers implementation)
 Resume file: None
-Next action: Execute 03-02-PLAN.md (Depth and heading controllers)
+Next action: Execute 03-03-PLAN.md (Velocity controller and launch file)
