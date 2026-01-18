@@ -19,7 +19,8 @@ EkfNode::EkfNode()
   process_noise_(Eigen::MatrixXd::Zero(STATE_SIZE, STATE_SIZE)),
   initialized_(false),
   R_imu_(Eigen::MatrixXd::Zero(6, 6)),
-  R_pressure_(Eigen::MatrixXd::Zero(1, 1))
+  R_pressure_(Eigen::MatrixXd::Zero(1, 1)),
+  R_dvl_(Eigen::MatrixXd::Zero(3, 3))
 {
   // Declare parameters with defaults
   this->declare_parameter("initial_covariance.position", 1.0);
@@ -59,6 +60,13 @@ EkfNode::EkfNode()
   // Depth noise ~0.1m uncertainty
   R_pressure_(0, 0) = 0.1 * 0.1;  // Variance = (0.1m)^2
 
+  // Initialize DVL measurement noise R_dvl (3x3 diagonal)
+  // Velocity noise ~0.01 m/s per axis (typical for DVL)
+  R_dvl_.diagonal() << 0.01, 0.01, 0.01;
+
+  // Initialize sensor timing (will be updated on first callback)
+  last_dvl_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
+
   // Create publisher for pose estimate
   pose_pub_ = this->create_publisher<nav_msgs::msg::Odometry>("/auv/ekf/pose", 10);
 
@@ -70,6 +78,10 @@ EkfNode::EkfNode()
   pressure_sub_ = this->create_subscription<sensor_msgs::msg::FluidPressure>(
     "/auv/pressure", 10,
     std::bind(&EkfNode::pressureCallback, this, std::placeholders::_1));
+
+  dvl_sub_ = this->create_subscription<stonefish_ros2::msg::DVL>(
+    "/auv/dvl", 10,
+    std::bind(&EkfNode::dvlCallback, this, std::placeholders::_1));
 
   // Create prediction timer
   auto period = std::chrono::duration<double>(1.0 / prediction_rate_);
@@ -408,6 +420,36 @@ void EkfNode::pressureCallback(const sensor_msgs::msg::FluidPressure::SharedPtr 
 
   // Perform measurement update
   measurementUpdate(z, H, R_pressure_);
+}
+
+void EkfNode::dvlCallback(const stonefish_ros2::msg::DVL::SharedPtr msg)
+{
+  // Skip if not initialized
+  if (!initialized_) {
+    return;
+  }
+
+  // Update DVL timing for dead reckoning detection
+  last_dvl_time_ = this->now();
+
+  // Extract velocity from DVL message (body frame)
+  double vx = msg->velocity.x;
+  double vy = msg->velocity.y;
+  double vz = msg->velocity.z;
+
+  // Create measurement vector z (3x1): [vx, vy, vz]
+  Eigen::VectorXd z(3);
+  z << vx, vy, vz;
+
+  // Create measurement matrix H (3x12): maps state velocity to measurement
+  // H selects states [VX, VY, VZ]
+  Eigen::MatrixXd H = Eigen::MatrixXd::Zero(3, STATE_SIZE);
+  H(0, VX) = 1.0;  // Measurement 0 is velocity x
+  H(1, VY) = 1.0;  // Measurement 1 is velocity y
+  H(2, VZ) = 1.0;  // Measurement 2 is velocity z
+
+  // Perform measurement update
+  measurementUpdate(z, H, R_dvl_);
 }
 
 }  // namespace auv_ekf

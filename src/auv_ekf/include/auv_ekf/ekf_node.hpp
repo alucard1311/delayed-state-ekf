@@ -8,6 +8,7 @@
 #include <sensor_msgs/msg/imu.hpp>
 #include <sensor_msgs/msg/fluid_pressure.hpp>
 #include <nav_msgs/msg/odometry.hpp>
+#include <stonefish_ros2/msg/dvl.hpp>
 #include <Eigen/Dense>
 
 namespace auv_ekf {
@@ -58,10 +59,15 @@ private:
   // Subscribers for sensor data
   rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_sub_;
   rclcpp::Subscription<sensor_msgs::msg::FluidPressure>::SharedPtr pressure_sub_;
+  rclcpp::Subscription<stonefish_ros2::msg::DVL>::SharedPtr dvl_sub_;
 
   // Measurement noise matrices
   Eigen::MatrixXd R_imu_;       // 6x6 for orientation + angular velocity
   Eigen::MatrixXd R_pressure_;  // 1x1 for depth
+  Eigen::MatrixXd R_dvl_;       // 3x3 for velocity (vx, vy, vz)
+
+  // Sensor timing for dead reckoning detection
+  rclcpp::Time last_dvl_time_;
 
   // Parameters
   double initial_covariance_position_;
@@ -82,6 +88,7 @@ private:
   // Sensor callbacks
   void imuCallback(const sensor_msgs::msg::Imu::SharedPtr msg);
   void pressureCallback(const sensor_msgs::msg::FluidPressure::SharedPtr msg);
+  void dvlCallback(const stonefish_ros2::msg::DVL::SharedPtr msg);
 
   /**
    * @brief Generic EKF measurement update
