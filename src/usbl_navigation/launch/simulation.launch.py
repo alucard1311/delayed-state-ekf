@@ -144,6 +144,18 @@ def launch_setup(context, *args, **kwargs):
         }],
     ))
 
+    # Metrics logger node (CSV output for plotting)
+    metrics_output_file = output_dir + '/navigation_metrics.csv'
+    nodes.append(Node(
+        package='usbl_navigation',
+        executable='metrics_logger_node',
+        name='metrics_logger',
+        output='screen',
+        parameters=[{
+            'output_file': metrics_output_file,
+        }],
+    ))
+
     # RViz (optional)
     if rviz.lower() == 'true':
         nodes.append(Node(

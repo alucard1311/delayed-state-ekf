@@ -195,6 +195,12 @@ install(DIRECTORY config launch
   DESTINATION share/${PROJECT_NAME}
 )
 
+# Install scripts (Python plotting tools)
+install(PROGRAMS
+  scripts/plot_results.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 # Testing
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
