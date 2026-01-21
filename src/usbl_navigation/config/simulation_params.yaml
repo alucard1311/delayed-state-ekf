@@ -1,0 +1,8 @@
+truth_generator:
+  vehicle_speed: 1.5      # m/s
+  survey_depth: 50.0      # meters (NED: positive down)
+  line_length: 100.0      # meters
+  line_spacing: 10.0      # meters
+  num_lines: 5
+  turn_radius: 5.0        # meters for smooth turns
+  publish_rate: 100.0     # Hz
