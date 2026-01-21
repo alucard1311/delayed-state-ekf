@@ -1,31 +1,29 @@
 """
 ROS2 Launch file for USBL Navigation simulation.
 
-Launches the sensor simulators and navigation filter for USBL navigation testing.
+Launches the sensor simulators, navigation filter, path publishers, and optionally RViz.
+
+Scenarios:
+- nominal: Standard conditions (5% USBL outliers, no DVL dropout)
+- canyon_dropout: DVL dropout during canyon crossing (120-150s)
+- high_outlier: High USBL outlier rate (20%)
 """
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.actions import DeclareLaunchArgument, OpaqueFunction
+from launch.conditions import IfCondition
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
 
-def generate_launch_description():
-    """Generate launch description for USBL navigation simulation."""
+def launch_setup(context, *args, **kwargs):
+    """Set up launch nodes with scenario-based parameter overrides."""
 
-    # Declare launch arguments
-    enable_canyon_dropout_arg = DeclareLaunchArgument(
-        'enable_canyon_dropout',
-        default_value='true',
-        description='Enable DVL dropout during canyon scenario'
-    )
-
-    output_dir_arg = DeclareLaunchArgument(
-        'output_dir',
-        default_value='/tmp',
-        description='Directory for output files (metrics, logs)'
-    )
+    # Get launch configurations
+    scenario = LaunchConfiguration('scenario').perform(context)
+    rviz = LaunchConfiguration('rviz').perform(context)
+    output_dir = LaunchConfiguration('output_dir').perform(context)
 
     # Package paths
     usbl_nav_share = FindPackageShare('usbl_navigation')
@@ -39,26 +37,47 @@ def generate_launch_description():
         usbl_nav_share, 'config', 'sensor_noise.yaml'
     ])
 
+    ekf_params = PathJoinSubstitution([
+        usbl_nav_share, 'config', 'ekf_params.yaml'
+    ])
+
+    rviz_config = PathJoinSubstitution([
+        usbl_nav_share, 'config', 'rviz_config.rviz'
+    ])
+
+    # Scenario-based parameter overrides
+    if scenario == 'canyon_dropout':
+        enable_canyon_dropout = True
+        outlier_probability = 0.05
+    elif scenario == 'high_outlier':
+        enable_canyon_dropout = False
+        outlier_probability = 0.20
+    else:  # nominal
+        enable_canyon_dropout = False
+        outlier_probability = 0.05
+
+    nodes = []
+
     # Truth generator node
-    truth_generator_node = Node(
+    nodes.append(Node(
         package='usbl_navigation',
         executable='truth_generator_node',
         name='truth_generator',
         output='screen',
         parameters=[simulation_params],
-    )
+    ))
 
     # IMU simulator node
-    imu_simulator_node = Node(
+    nodes.append(Node(
         package='usbl_navigation',
         executable='imu_simulator_node',
         name='imu_simulator',
         output='screen',
         parameters=[simulation_params, sensor_noise_params],
-    )
+    ))
 
-    # DVL simulator node
-    dvl_simulator_node = Node(
+    # DVL simulator node with scenario-based canyon dropout
+    nodes.append(Node(
         package='usbl_navigation',
         executable='dvl_simulator_node',
         name='dvl_simulator',
@@ -66,26 +85,25 @@ def generate_launch_description():
         parameters=[
             simulation_params,
             sensor_noise_params,
-            {'enable_canyon_dropout': LaunchConfiguration('enable_canyon_dropout')},
+            {'enable_canyon_dropout': enable_canyon_dropout},
         ],
-    )
+    ))
 
-    # USBL simulator node
-    usbl_simulator_node = Node(
+    # USBL simulator node with scenario-based outlier rate
+    nodes.append(Node(
         package='usbl_navigation',
         executable='usbl_simulator_node',
         name='usbl_simulator',
         output='screen',
-        parameters=[simulation_params, sensor_noise_params],
-    )
-
-    # EKF parameters
-    ekf_params = PathJoinSubstitution([
-        usbl_nav_share, 'config', 'ekf_params.yaml'
-    ])
+        parameters=[
+            simulation_params,
+            sensor_noise_params,
+            {'usbl.outlier_probability': outlier_probability},
+        ],
+    ))
 
     # Navigation node (delayed-state EKF)
-    navigation_node = Node(
+    nodes.append(Node(
         package='usbl_navigation',
         executable='navigation_node',
         name='navigation_node',
@@ -94,32 +112,79 @@ def generate_launch_description():
             ekf_params,
             sensor_noise_params,
         ],
+    ))
+
+    # Path publisher for truth trajectory
+    nodes.append(Node(
+        package='usbl_navigation',
+        executable='path_publisher_node',
+        name='truth_path_publisher',
+        output='screen',
+        parameters=[{
+            'input_topic': '/truth',
+            'output_topic': '/truth_path',
+            'frame_id': 'world',
+            'max_points': 1000,
+            'publish_rate': 2.0,
+        }],
+    ))
+
+    # Path publisher for estimate trajectory
+    nodes.append(Node(
+        package='usbl_navigation',
+        executable='path_publisher_node',
+        name='estimate_path_publisher',
+        output='screen',
+        parameters=[{
+            'input_topic': '/navigation/odometry',
+            'output_topic': '/estimate_path',
+            'frame_id': 'world',
+            'max_points': 1000,
+            'publish_rate': 2.0,
+        }],
+    ))
+
+    # RViz (optional)
+    if rviz.lower() == 'true':
+        nodes.append(Node(
+            package='rviz2',
+            executable='rviz2',
+            name='rviz2',
+            output='screen',
+            arguments=['-d', rviz_config],
+        ))
+
+    return nodes
+
+
+def generate_launch_description():
+    """Generate launch description for USBL navigation simulation."""
+
+    # Declare launch arguments
+    scenario_arg = DeclareLaunchArgument(
+        'scenario',
+        default_value='nominal',
+        description='Simulation scenario: nominal, canyon_dropout, or high_outlier',
+        choices=['nominal', 'canyon_dropout', 'high_outlier']
     )
 
-    # Future nodes (commented out until implemented):
-    # --------------------------------------------------------------------------
+    rviz_arg = DeclareLaunchArgument(
+        'rviz',
+        default_value='false',
+        description='Launch RViz for visualization'
+    )
 
-    # Metrics logger node (Phase 8)
-    # metrics_logger_node = Node(
-    #     package='usbl_navigation',
-    #     executable='metrics_logger_node',
-    #     name='metrics_logger',
-    #     output='screen',
-    #     parameters=[
-    #         {'output_dir': LaunchConfiguration('output_dir')},
-    #     ],
-    # )
+    output_dir_arg = DeclareLaunchArgument(
+        'output_dir',
+        default_value='/tmp',
+        description='Directory for output files (metrics, logs)'
+    )
 
     return LaunchDescription([
         # Arguments
-        enable_canyon_dropout_arg,
+        scenario_arg,
+        rviz_arg,
         output_dir_arg,
-        # Sensor simulators
-        truth_generator_node,
-        imu_simulator_node,
-        dvl_simulator_node,
-        usbl_simulator_node,
-        # Navigation filter
-        navigation_node,
-        # metrics_logger_node,     # Phase 8
+        # Nodes via OpaqueFunction for scenario-based configuration
+        OpaqueFunction(function=launch_setup),
     ])
