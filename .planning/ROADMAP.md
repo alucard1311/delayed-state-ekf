@@ -106,7 +106,7 @@ Plans:
 **Milestone Goal:** Demonstrate delayed-state EKF fusion with USBL — the key technique for real underwater navigation where acoustic positioning has multi-second latency.
 
 - [x] **Phase 6: Sensor Foundation** - Truth generator + IMU/DVL/USBL simulators
-- [ ] **Phase 7: Navigation Filter** - 15-state delayed-state EKF
+- [x] **Phase 7: Navigation Filter** - 15-state delayed-state EKF
 - [ ] **Phase 8: Demo & Visualization** - Metrics, plots, RViz, scenarios
 
 ### Phase 6: Sensor Foundation
@@ -147,8 +147,8 @@ Plans:
 
 Plans:
 - [x] 07-01: State buffer and EKF prediction
-- [ ] 07-02: DVL and USBL measurement updates
-- [ ] 07-03: Navigation node and integration
+- [x] 07-02: DVL and USBL measurement updates
+- [x] 07-03: Navigation node and integration
 
 ### Phase 8: Demo & Visualization
 **Goal**: Publication-quality demo with metrics and visualizations
@@ -184,5 +184,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 4. Planning | v1.0 | 3/3 | Complete | 2026-01-20 |
 | 5. Demo | v1.0 | 1/1 | Complete | 2026-01-20 |
 | 6. Sensor Foundation | v2.0 | 3/3 | Complete | 2026-01-21 |
-| 7. Navigation Filter | v2.0 | 1/3 | In progress | - |
+| 7. Navigation Filter | v2.0 | 3/3 | Complete | 2026-01-21 |
 | 8. Demo & Visualization | v2.0 | 0/3 | Not started | - |
