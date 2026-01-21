@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 Phase: 8 of 8 (Demo & Visualization)
 Plan: 2 of 3 in current phase
 Status: In progress
-Last activity: 2026-01-20 — Completed 08-02-PLAN.md
+Last activity: 2026-01-21 — Completed 08-01-PLAN.md
 
 Progress: █████████████████████████████░░ 95% (21 of 22 plans)
 
@@ -62,6 +62,8 @@ Recent decisions affecting current work:
 | 07-03 | 50Hz odometry publish rate | Matches typical control loop requirements |
 | 08-02 | 2Hz path publish rate | RViz efficiency over 50Hz odometry rate |
 | 08-02 | OpaqueFunction launch pattern | Scenario-based parameter overrides with choices validation |
+| 08-01 | ApproximateTimeSynchronizer 10ms | Truth at 100Hz, odom at 50Hz need fuzzy sync |
+| 08-01 | Numpy for CSV parsing | pandas not available as system package |
 
 ### Pending Todos
 
@@ -73,8 +75,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-20
-Stopped at: Completed 08-02-PLAN.md
+Last session: 2026-01-21
+Stopped at: Completed 08-01-PLAN.md
 
 **v1.0 Status:**
 - All 5 phases complete (13 plans)
