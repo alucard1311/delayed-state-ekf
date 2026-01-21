@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-20)
 
 **Core value:** Delayed-state EKF fusion with USBL — the key technique for real underwater navigation
-**Current focus:** Phase 8 — Demo & Visualization
+**Current focus:** Phase 8 — Demo & Visualization (Checkpoint)
 
 ## Current Position
 
 Phase: 8 of 8 (Demo & Visualization)
-Plan: 2 of 3 in current phase
-Status: In progress
-Last activity: 2026-01-21 — Completed 08-01-PLAN.md
+Plan: 3 of 3 in current phase
+Status: CHECKPOINT - Awaiting human verification
+Last activity: 2026-01-21 — Executed 08-03-PLAN.md with bug fixes
 
-Progress: █████████████████████████████░░ 95% (21 of 22 plans)
+Progress: █████████████████████████████░░ 95% (21 of 22 plans executed, checkpoint pending)
 
 ## Performance Metrics
 
@@ -34,7 +34,7 @@ Progress: ███████████████████████�
 | 05-demo | v1.0 | 1/1 | Complete |
 | 06-sensor-foundation | v2.0 | 3/3 | Complete |
 | 07-navigation-filter | v2.0 | 3/3 | Complete |
-| 08-demo-visualization | v2.0 | 2/3 | In progress |
+| 08-demo-visualization | v2.0 | 3/3 | Checkpoint |
 
 ## Accumulated Context
 
@@ -64,6 +64,9 @@ Recent decisions affecting current work:
 | 08-02 | OpaqueFunction launch pattern | Scenario-based parameter overrides with choices validation |
 | 08-01 | ApproximateTimeSynchronizer 10ms | Truth at 100Hz, odom at 50Hz need fuzzy sync |
 | 08-01 | Numpy for CSV parsing | pandas not available as system package |
+| 08-03 | 100m initial position covariance | Allow USBL to bootstrap from unknown position |
+| 08-03 | 0.5 Hz USBL rate | Faster corrections for better convergence |
+| 08-03 | Permissive Mahalanobis threshold | 100.0 for demo robustness |
 
 ### Pending Todos
 
@@ -71,12 +74,16 @@ None.
 
 ### Blockers/Concerns
 
-None.
+**Heading Drift Issue (08-03):**
+- EKF heading drifts without compass/magnetometer aiding
+- Causes divergence after ~60s (first turn in lawnmower)
+- Full 180s scenario not achievable with current system
+- Acceptable for demo of USBL navigation concept
 
 ## Session Continuity
 
 Last session: 2026-01-21
-Stopped at: Completed 08-01-PLAN.md
+Stopped at: Checkpoint in 08-03-PLAN.md - Awaiting human verification
 
 **v1.0 Status:**
 - All 5 phases complete (13 plans)
@@ -95,8 +102,39 @@ Stopped at: Completed 08-01-PLAN.md
 **Phase 8 Status:**
 - 08-01: Metrics logger node - COMPLETE
 - 08-02: RViz config and launch updates - COMPLETE
-- 08-03: Scenario testing and analysis - NOT STARTED
+- 08-03: Scenario testing and analysis - CHECKPOINT
 
-**Next action:** Execute 08-03-PLAN.md (scenario testing)
+**Next action:** Human verification of demo results
 
 Resume file: None
+
+## Checkpoint Details (08-03)
+
+**What was built:**
+- Fixed topic mismatches (metrics logger, path publisher)
+- Fixed DVL message type mismatch
+- Tuned EKF for USBL bootstrap and convergence
+- Demonstrated filter convergence within ~10s of first USBL fix
+
+**Verification needed:**
+1. Filter achieves <2m error for straight-line segments
+2. USBL sawtooth correction pattern visible
+3. Known limitation: heading drift prevents full lawnmower pattern
+
+**How to verify:**
+```bash
+# Build and source
+colcon build --packages-select usbl_navigation
+source install/setup.bash
+
+# Run nominal scenario (60s is sufficient to see convergence)
+mkdir -p /tmp/usbl_demo/nominal
+timeout 60 ros2 launch usbl_navigation simulation.launch.py \
+  scenario:=nominal \
+  output_dir:=/tmp/usbl_demo/nominal
+
+# Check metrics CSV
+head -50 /tmp/usbl_demo/nominal/navigation_metrics.csv
+```
+
+**Resume signal:** Type "approved" to complete milestone, or provide instructions
