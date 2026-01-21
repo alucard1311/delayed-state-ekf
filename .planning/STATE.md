@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-20)
 
 **Core value:** Delayed-state EKF fusion with USBL — the key technique for real underwater navigation
-**Current focus:** Phase 8 — Demo & Visualization (Checkpoint)
+**Current focus:** Phase 8 — Demo & Visualization (Complete)
 
 ## Current Position
 
 Phase: 8 of 8 (Demo & Visualization)
 Plan: 3 of 3 in current phase
-Status: CHECKPOINT - Awaiting human verification
-Last activity: 2026-01-21 — Executed 08-03-PLAN.md with bug fixes
+Status: COMPLETE - All phases finished
+Last activity: 2026-01-21 — Checkpoint approved for 08-03
 
-Progress: █████████████████████████████░░ 95% (21 of 22 plans executed, checkpoint pending)
+Progress: ████████████████████████████████ 100% (22 of 22 plans executed)
 
 ## Performance Metrics
 
@@ -34,7 +34,7 @@ Progress: ███████████████████████�
 | 05-demo | v1.0 | 1/1 | Complete |
 | 06-sensor-foundation | v2.0 | 3/3 | Complete |
 | 07-navigation-filter | v2.0 | 3/3 | Complete |
-| 08-demo-visualization | v2.0 | 3/3 | Checkpoint |
+| 08-demo-visualization | v2.0 | 3/3 | Complete |
 
 ## Accumulated Context
 
@@ -102,39 +102,16 @@ Stopped at: Checkpoint in 08-03-PLAN.md - Awaiting human verification
 **Phase 8 Status:**
 - 08-01: Metrics logger node - COMPLETE
 - 08-02: RViz config and launch updates - COMPLETE
-- 08-03: Scenario testing and analysis - CHECKPOINT
+- 08-03: Scenario testing and analysis - COMPLETE (checkpoint approved)
 
-**Next action:** Human verification of demo results
+**Next action:** Milestone v2.0 complete. Ready for archival or next milestone planning.
 
 Resume file: None
 
-## Checkpoint Details (08-03)
+## Milestone v2.0 Summary
 
-**What was built:**
-- Fixed topic mismatches (metrics logger, path publisher)
-- Fixed DVL message type mismatch
-- Tuned EKF for USBL bootstrap and convergence
-- Demonstrated filter convergence within ~10s of first USBL fix
-
-**Verification needed:**
-1. Filter achieves <2m error for straight-line segments
-2. USBL sawtooth correction pattern visible
-3. Known limitation: heading drift prevents full lawnmower pattern
-
-**How to verify:**
-```bash
-# Build and source
-colcon build --packages-select usbl_navigation
-source install/setup.bash
-
-# Run nominal scenario (60s is sufficient to see convergence)
-mkdir -p /tmp/usbl_demo/nominal
-timeout 60 ros2 launch usbl_navigation simulation.launch.py \
-  scenario:=nominal \
-  output_dir:=/tmp/usbl_demo/nominal
-
-# Check metrics CSV
-head -50 /tmp/usbl_demo/nominal/navigation_metrics.csv
-```
-
-**Resume signal:** Type "approved" to complete milestone, or provide instructions
+All phases complete. The USBL navigation system demonstrates:
+- Delayed-state EKF fusion with USBL measurements
+- Filter convergence to <2m error within 10-15 seconds
+- USBL sawtooth correction pattern
+- Known limitation: heading drift without compass aiding (documented and accepted)

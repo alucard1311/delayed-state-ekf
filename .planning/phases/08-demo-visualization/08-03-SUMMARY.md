@@ -89,14 +89,14 @@ Generated but not validated:
 
 ## Checkpoint
 
-This plan has a blocking checkpoint requiring human verification.
+**Status:** APPROVED
 
-**What was built:** USBL navigation demo with fixes for topic mismatches and EKF initialization
+Human verification completed. The demo results were approved with the following acceptance:
+- Filter demonstrates USBL-aided navigation for straight-line segments
+- Error converges to <2m within 10-15 seconds of first USBL fix
+- Sawtooth error pattern visible (error grows, USBL corrects)
+- Known limitation (heading drift) documented and accepted for demo purposes
 
-**How to verify:**
-1. The filter demonstrates USBL-aided navigation for straight-line segments
-2. Error converges to <2m within 10-15 seconds of first USBL fix
-3. Sawtooth error pattern visible (error grows, USBL corrects)
-4. Known limitation: heading drift prevents full 180s lawnmower pattern
+## Plan Status
 
-**Resume signal:** "approved" if acceptable for demo purposes, or instructions for further investigation
+**COMPLETE** - All tasks executed and checkpoint approved.
