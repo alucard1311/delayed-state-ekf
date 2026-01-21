@@ -57,13 +57,13 @@ Requirements for v2.0 milestone. Demonstrates delayed-state EKF fusion with USBL
 
 ### Sensor Simulation
 
-- [ ] **SIM-01**: Truth generator publishes ground truth trajectory (lawnmower survey pattern)
-- [ ] **SIM-02**: IMU simulator adds realistic noise and bias drift to truth data
-- [ ] **SIM-03**: DVL simulator converts NED velocity to body frame with noise and dropouts
-- [ ] **SIM-04**: DVL simulator implements canyon dropout scenario (t=120s to t=150s)
-- [ ] **SIM-05**: USBL simulator publishes DELAYED position measurements (timestamp = measurement time)
-- [ ] **SIM-06**: USBL simulator adds range-dependent noise (max(2% * range, 0.3m))
-- [ ] **SIM-07**: USBL simulator implements outlier injection (5% probability, 5m offset)
+- [x] **SIM-01**: Truth generator publishes ground truth trajectory (lawnmower survey pattern)
+- [x] **SIM-02**: IMU simulator adds realistic noise and bias drift to truth data
+- [x] **SIM-03**: DVL simulator converts NED velocity to body frame with noise and dropouts
+- [x] **SIM-04**: DVL simulator implements canyon dropout scenario (t=120s to t=150s)
+- [x] **SIM-05**: USBL simulator publishes DELAYED position measurements (timestamp = measurement time)
+- [x] **SIM-06**: USBL simulator adds range-dependent noise (max(2% * range, 0.3m))
+- [x] **SIM-07**: USBL simulator implements outlier injection (5% probability, 5m offset)
 
 ### Delayed-State EKF
 
@@ -158,13 +158,13 @@ Which phases cover which requirements. Updated by create-roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SIM-01 | Phase 6 | Pending |
-| SIM-02 | Phase 6 | Pending |
-| SIM-03 | Phase 6 | Pending |
-| SIM-04 | Phase 6 | Pending |
-| SIM-05 | Phase 6 | Pending |
-| SIM-06 | Phase 6 | Pending |
-| SIM-07 | Phase 6 | Pending |
+| SIM-01 | Phase 6 | Complete |
+| SIM-02 | Phase 6 | Complete |
+| SIM-03 | Phase 6 | Complete |
+| SIM-04 | Phase 6 | Complete |
+| SIM-05 | Phase 6 | Complete |
+| SIM-06 | Phase 6 | Complete |
+| SIM-07 | Phase 6 | Complete |
 | DEKF-01 | Phase 7 | Pending |
 | DEKF-02 | Phase 7 | Pending |
 | DEKF-03 | Phase 7 | Pending |
@@ -185,9 +185,9 @@ Which phases cover which requirements. Updated by create-roadmap.
 
 **Coverage:**
 - v1 requirements: 26 total, 26 complete
-- v2 requirements: 24 total, 24 mapped
+- v2 requirements: 24 total, 7 complete, 17 pending
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-01-17*
-*Last updated: 2026-01-20 after v2.0 milestone start*
+*Last updated: 2026-01-21 after Phase 6 complete*
