@@ -125,7 +125,7 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 06-01: Package scaffolding and truth generator
+- [x] 06-01: Package scaffolding and truth generator
 - [ ] 06-02: IMU and DVL simulators
 - [ ] 06-03: USBL simulator with delayed timestamps
 
@@ -183,6 +183,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 3. Control | v1.0 | 3/3 | Complete | 2026-01-20 |
 | 4. Planning | v1.0 | 3/3 | Complete | 2026-01-20 |
 | 5. Demo | v1.0 | 1/1 | Complete | 2026-01-20 |
-| 6. Sensor Foundation | v2.0 | 0/3 | Not started | - |
+| 6. Sensor Foundation | v2.0 | 1/3 | In progress | - |
 | 7. Navigation Filter | v2.0 | 0/3 | Not started | - |
 | 8. Demo & Visualization | v2.0 | 0/3 | Not started | - |
