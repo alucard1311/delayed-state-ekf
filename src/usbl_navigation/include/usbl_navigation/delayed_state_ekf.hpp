@@ -206,8 +206,25 @@ private:
   /**
    * @brief Repropagate state from historical time to current time
    * @param from_time Starting time for repropagation
+   * @param corrected_state Corrected state at measurement time
+   * @param corrected_cov Corrected covariance at measurement time
+   */
+  void repropagateFrom(const rclcpp::Time& from_time,
+                       const Eigen::Matrix<double, STATE_SIZE, 1>& corrected_state,
+                       const Eigen::Matrix<double, STATE_SIZE, STATE_SIZE>& corrected_cov);
+
+  /**
+   * @brief Repropagate state from historical time to current time (uses current state)
+   * @param from_time Starting time for repropagation
    */
   void repropagateFrom(const rclcpp::Time& from_time);
+
+  /**
+   * @brief Core prediction step without IMU buffer update (for repropagation)
+   * @param imu IMU measurement
+   * @param dt Time step in seconds
+   */
+  void predictInternal(const ImuMeasurement& imu, double dt);
 
   /**
    * @brief Trim IMU buffer to remove old measurements
