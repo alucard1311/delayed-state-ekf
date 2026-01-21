@@ -7,7 +7,7 @@ Build a complete AUV simulation demonstrating autonomous underwater navigation. 
 ## Milestones
 
 - ✅ **v1.0 Vertical Slice** - Phases 1-5 (complete)
-- 🚧 **v2.0 USBL Navigation Demo** - Phases 6-8 (in progress)
+- ✅ **v2.0 USBL Navigation Demo** - Phases 6-8 (complete)
 
 ## Phases
 
@@ -101,13 +101,13 @@ Plans:
 
 </details>
 
-### 🚧 v2.0 USBL Navigation Demo (In Progress)
+### ✅ v2.0 USBL Navigation Demo (Complete)
 
 **Milestone Goal:** Demonstrate delayed-state EKF fusion with USBL — the key technique for real underwater navigation where acoustic positioning has multi-second latency.
 
 - [x] **Phase 6: Sensor Foundation** - Truth generator + IMU/DVL/USBL simulators
 - [x] **Phase 7: Navigation Filter** - 15-state delayed-state EKF
-- [ ] **Phase 8: Demo & Visualization** - Metrics, plots, RViz, scenarios
+- [x] **Phase 8: Demo & Visualization** - Metrics, plots, RViz, scenarios
 
 ### Phase 6: Sensor Foundation
 **Goal**: Standalone sensor simulators for controlled USBL navigation testing
@@ -169,7 +169,7 @@ Plans:
 Plans:
 - [x] 08-01: Metrics logger and plotting scripts
 - [x] 08-02: RViz configuration and launch file
-- [ ] 08-03: Run scenarios and generate results
+- [x] 08-03: Run scenarios and generate results
 
 ## Progress
 
@@ -185,4 +185,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 5. Demo | v1.0 | 1/1 | Complete | 2026-01-20 |
 | 6. Sensor Foundation | v2.0 | 3/3 | Complete | 2026-01-21 |
 | 7. Navigation Filter | v2.0 | 3/3 | Complete | 2026-01-21 |
-| 8. Demo & Visualization | v2.0 | 2/3 | In progress | - |
+| 8. Demo & Visualization | v2.0 | 3/3 | Complete | 2026-01-21 |

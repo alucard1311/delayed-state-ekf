@@ -67,29 +67,29 @@ Requirements for v2.0 milestone. Demonstrates delayed-state EKF fusion with USBL
 
 ### Delayed-State EKF
 
-- [ ] **DEKF-01**: State buffer stores historical states with timestamps (500 entries, ~5s)
-- [ ] **DEKF-02**: EKF uses 15-state vector (pos, vel, quat, gyro_bias, accel_bias)
-- [ ] **DEKF-03**: EKF prediction step integrates IMU with bias removal
-- [ ] **DEKF-04**: DVL update reduces velocity uncertainty using body-frame measurement
-- [ ] **DEKF-05**: USBL update finds historical state at measurement timestamp
-- [ ] **DEKF-06**: USBL update applies Mahalanobis gating for outlier rejection
-- [ ] **DEKF-07**: USBL update repropagates state to current time after correction
-- [ ] **DEKF-08**: Navigation node publishes filtered odometry at 50Hz
+- [x] **DEKF-01**: State buffer stores historical states with timestamps (500 entries, ~5s)
+- [x] **DEKF-02**: EKF uses 15-state vector (pos, vel, quat, gyro_bias, accel_bias)
+- [x] **DEKF-03**: EKF prediction step integrates IMU with bias removal
+- [x] **DEKF-04**: DVL update reduces velocity uncertainty using body-frame measurement
+- [x] **DEKF-05**: USBL update finds historical state at measurement timestamp
+- [x] **DEKF-06**: USBL update applies Mahalanobis gating for outlier rejection
+- [x] **DEKF-07**: USBL update repropagates state to current time after correction
+- [x] **DEKF-08**: Navigation node publishes filtered odometry at 50Hz
 
 ### Visualization & Metrics
 
-- [ ] **VIZ-01**: Metrics logger records truth, estimate, error, covariance to CSV
-- [ ] **VIZ-02**: Plotting script generates position error sawtooth plot
-- [ ] **VIZ-03**: Plotting script generates trajectory comparison plot (truth vs estimate)
-- [ ] **VIZ-04**: Plotting script generates covariance consistency plot (error within 3σ bounds)
-- [ ] **VIZ-05**: RViz configuration shows truth path, estimated path, and USBL fixes
-- [ ] **VIZ-06**: Complete launch file starts all nodes with configurable parameters
+- [x] **VIZ-01**: Metrics logger records truth, estimate, error, covariance to CSV
+- [x] **VIZ-02**: Plotting script generates position error sawtooth plot
+- [x] **VIZ-03**: Plotting script generates trajectory comparison plot (truth vs estimate)
+- [x] **VIZ-04**: Plotting script generates covariance consistency plot (error within 3σ bounds)
+- [x] **VIZ-05**: RViz configuration shows truth path, estimated path, and USBL fixes
+- [x] **VIZ-06**: Complete launch file starts all nodes with configurable parameters
 
 ### Demo Scenarios
 
-- [ ] **SCEN-01**: Nominal scenario achieves <2m final error, <5m max error
-- [ ] **SCEN-02**: DVL dropout scenario shows error growth then USBL recovery
-- [ ] **SCEN-03**: High outlier scenario rejects outliers without position jumps
+- [x] **SCEN-01**: Nominal scenario achieves <2m final error, <5m max error
+- [x] **SCEN-02**: DVL dropout scenario shows error growth then USBL recovery
+- [x] **SCEN-03**: High outlier scenario rejects outliers without position jumps
 
 ## v3 Requirements (Deferred)
 
@@ -173,21 +173,21 @@ Which phases cover which requirements. Updated by create-roadmap.
 | DEKF-06 | Phase 7 | Complete |
 | DEKF-07 | Phase 7 | Complete |
 | DEKF-08 | Phase 7 | Complete |
-| VIZ-01 | Phase 8 | Pending |
-| VIZ-02 | Phase 8 | Pending |
-| VIZ-03 | Phase 8 | Pending |
-| VIZ-04 | Phase 8 | Pending |
-| VIZ-05 | Phase 8 | Pending |
-| VIZ-06 | Phase 8 | Pending |
-| SCEN-01 | Phase 8 | Pending |
-| SCEN-02 | Phase 8 | Pending |
-| SCEN-03 | Phase 8 | Pending |
+| VIZ-01 | Phase 8 | Complete |
+| VIZ-02 | Phase 8 | Complete |
+| VIZ-03 | Phase 8 | Complete |
+| VIZ-04 | Phase 8 | Complete |
+| VIZ-05 | Phase 8 | Complete |
+| VIZ-06 | Phase 8 | Complete |
+| SCEN-01 | Phase 8 | Complete |
+| SCEN-02 | Phase 8 | Complete |
+| SCEN-03 | Phase 8 | Complete |
 
 **Coverage:**
 - v1 requirements: 26 total, 26 complete
-- v2 requirements: 24 total, 15 complete, 9 pending
+- v2 requirements: 24 total, 24 complete
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-01-17*
-*Last updated: 2026-01-21 after Phase 7 complete*
+*Last updated: 2026-01-21 after Phase 8 complete (v2.0 milestone complete)*
