@@ -165,14 +165,14 @@ Which phases cover which requirements. Updated by create-roadmap.
 | SIM-05 | Phase 6 | Complete |
 | SIM-06 | Phase 6 | Complete |
 | SIM-07 | Phase 6 | Complete |
-| DEKF-01 | Phase 7 | Pending |
-| DEKF-02 | Phase 7 | Pending |
-| DEKF-03 | Phase 7 | Pending |
-| DEKF-04 | Phase 7 | Pending |
-| DEKF-05 | Phase 7 | Pending |
-| DEKF-06 | Phase 7 | Pending |
-| DEKF-07 | Phase 7 | Pending |
-| DEKF-08 | Phase 7 | Pending |
+| DEKF-01 | Phase 7 | Complete |
+| DEKF-02 | Phase 7 | Complete |
+| DEKF-03 | Phase 7 | Complete |
+| DEKF-04 | Phase 7 | Complete |
+| DEKF-05 | Phase 7 | Complete |
+| DEKF-06 | Phase 7 | Complete |
+| DEKF-07 | Phase 7 | Complete |
+| DEKF-08 | Phase 7 | Complete |
 | VIZ-01 | Phase 8 | Pending |
 | VIZ-02 | Phase 8 | Pending |
 | VIZ-03 | Phase 8 | Pending |
@@ -185,9 +185,9 @@ Which phases cover which requirements. Updated by create-roadmap.
 
 **Coverage:**
 - v1 requirements: 26 total, 26 complete
-- v2 requirements: 24 total, 7 complete, 17 pending
+- v2 requirements: 24 total, 15 complete, 9 pending
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-01-17*
-*Last updated: 2026-01-21 after Phase 6 complete*
+*Last updated: 2026-01-21 after Phase 7 complete*
