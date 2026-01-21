@@ -8,32 +8,50 @@ A containerized simulation pipeline demonstrating autonomous underwater vehicle 
 
 **Full vertical slice:** One complete mission (dive → waypoint → surface) with all layers working — EKF navigation, state machine, control, and Docker containerization. Every piece must be defensible in a code walkthrough.
 
+## Current Milestone: v2.0 USBL Navigation Demo
+
+**Goal:** Demonstrate delayed-state EKF fusion with USBL — the key technique for real underwater navigation where acoustic positioning has multi-second latency.
+
+**Target features:**
+- Sensor simulators (truth, IMU, DVL, USBL with realistic delays/noise)
+- 15-state delayed-state EKF with state buffer and repropagation
+- USBL delayed measurement update with Mahalanobis outlier rejection
+- DVL dropout handling (canyon scenario)
+- Metrics logging and publication-quality plots
+- RViz visualization of truth vs estimate
+
 ## Requirements
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ C++ EKF state estimator fusing DVL, IMU, depth sensors — v1.0
+- ✓ C++ PID controllers for depth, heading, and velocity — v1.0
+- ✓ Python mission planner with waypoint management — v1.0
+- ✓ Autonomous behavior state machine with error handling — v1.0
+- ✓ Docker containerized simulation environment with Stonefish — v1.0
+- ✓ ROS2 Humble integration with proper topic architecture — v1.0
 
 ### Active
 
-- [ ] C++ EKF state estimator fusing DVL, IMU, depth sensors (GPS-denied capable)
-- [ ] C++ PID controllers for depth, heading, and velocity
-- [ ] Python mission planner with waypoint management
-- [ ] Autonomous behavior state machine with error handling and fail-safes
-- [ ] Docker containerized simulation environment with Stonefish
-- [ ] ROS2 Humble integration with proper topic architecture
-- [ ] Unit tests for EKF and control algorithms
-- [ ] Basic CI/CD pipeline (GitHub Actions)
-- [ ] Complete vertical slice demo: dive to depth, navigate to waypoint, surface
+- [ ] Truth generator node with lawnmower survey pattern
+- [ ] IMU simulator with realistic noise and bias drift
+- [ ] DVL simulator with body-frame velocity, dropouts, canyon scenario
+- [ ] USBL simulator with delayed timestamps, range-dependent noise, outliers
+- [ ] State buffer for historical state/IMU storage
+- [ ] 15-state delayed-state EKF (pos, vel, quat, gyro_bias, accel_bias)
+- [ ] USBL delayed measurement update with repropagation
+- [ ] Mahalanobis gating for outlier rejection
+- [ ] Metrics logger node (CSV output)
+- [ ] Python plotting script (sawtooth error, trajectory, covariance bounds)
+- [ ] RViz configuration for navigation visualization
 
 ### Out of Scope
 
-- USBL beacon integration — complex hardware dependency, not needed for demo
-- Full lawnmower survey patterns — simple waypoint following sufficient for interview
 - C++ planning layer — Python is pragmatic here, C++ reserved for core algorithms
 - Multiple docker-compose services — single container sufficient for demo
 - Perception/computer vision — listed as "desired" not "required" in JD
-- Media/video generation — can record after implementation
+- Real Stonefish physics integration — pure simulation for USBL demo
+- Unit tests for this milestone — focus on working demo first
 
 ## Context
 
@@ -68,10 +86,14 @@ A containerized simulation pipeline demonstrating autonomous underwater vehicle 
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| C++ for EKF/control, Python for planning | Matches real AUV stacks, shows C++ proficiency while maintaining velocity | — Pending |
-| Add state machine layer | JD explicitly requires "autonomous state machine for decision-making" | — Pending |
-| Single vertical slice over breadth | One working mission more impressive than many half-working features | — Pending |
-| Skip USBL/lawnmower patterns | Not required for core demo, can discuss as "future work" | — Pending |
+| C++ for EKF/control, Python for planning | Matches real AUV stacks, shows C++ proficiency while maintaining velocity | ✓ Good |
+| Add state machine layer | JD explicitly requires "autonomous state machine for decision-making" | ✓ Good |
+| Single vertical slice over breadth | One working mission more impressive than many half-working features | ✓ Good |
+| Skip USBL/lawnmower patterns (v1.0) | Not required for core demo, can discuss as "future work" | ✓ Good |
+| Delayed-state EKF for USBL (v2.0) | Shows understanding of real underwater nav challenges — acoustic latency | — Pending |
+| Standalone usbl_navigation package (v2.0) | Clean separation from v1.0 code, focused demo | — Pending |
+| Sensor simulators instead of Stonefish (v2.0) | Faster iteration, precise control over test scenarios | — Pending |
+| 15-state with bias estimation (v2.0) | Production-grade INS, shows depth of understanding | — Pending |
 
 ---
-*Last updated: 2026-01-17 after initialization*
+*Last updated: 2026-01-20 after v2.0 milestone start*
