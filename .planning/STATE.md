@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-20)
 
 **Core value:** Delayed-state EKF fusion with USBL — the key technique for real underwater navigation
-**Current focus:** Phase 7 — Navigation Filter
+**Current focus:** Phase 8 — Demo & Visualization
 
 ## Current Position
 
-Phase: 7 of 8 (Navigation Filter)
-Plan: 3 of 3 in current phase
-Status: Phase complete
-Last activity: 2026-01-21 — Completed 07-03-PLAN.md
+Phase: 8 of 8 (Demo & Visualization)
+Plan: 2 of 3 in current phase
+Status: In progress
+Last activity: 2026-01-20 — Completed 08-02-PLAN.md
 
-Progress: █████████████████████████████░ 86% (19 of 22 plans)
+Progress: █████████████████████████████░░ 95% (21 of 22 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 19 (13 v1.0 + 6 v2.0)
+- Total plans completed: 21 (13 v1.0 + 8 v2.0)
 - Average duration: ~7min
-- Total execution time: ~128 min
+- Total execution time: ~140 min
 
 **By Phase:**
 
@@ -34,7 +34,7 @@ Progress: ███████████████████████�
 | 05-demo | v1.0 | 1/1 | Complete |
 | 06-sensor-foundation | v2.0 | 3/3 | Complete |
 | 07-navigation-filter | v2.0 | 3/3 | Complete |
-| 08-demo-visualization | v2.0 | 0/3 | Not started |
+| 08-demo-visualization | v2.0 | 2/3 | In progress |
 
 ## Accumulated Context
 
@@ -60,6 +60,8 @@ Recent decisions affecting current work:
 | 07-01 | Chi-squared 9.21 threshold | 3DOF, 99% confidence for USBL outlier rejection |
 | 07-02 | Joseph form covariance update | Numerically stable for ill-conditioned matrices |
 | 07-03 | 50Hz odometry publish rate | Matches typical control loop requirements |
+| 08-02 | 2Hz path publish rate | RViz efficiency over 50Hz odometry rate |
+| 08-02 | OpaqueFunction launch pattern | Scenario-based parameter overrides with choices validation |
 
 ### Pending Todos
 
@@ -71,8 +73,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-21
-Stopped at: Completed 07-03-PLAN.md (Phase 7 complete)
+Last session: 2026-01-20
+Stopped at: Completed 08-02-PLAN.md
 
 **v1.0 Status:**
 - All 5 phases complete (13 plans)
@@ -88,6 +90,11 @@ Stopped at: Completed 07-03-PLAN.md (Phase 7 complete)
 - 07-02: DVL and USBL measurement updates - COMPLETE
 - 07-03: Navigation node and integration - COMPLETE
 
-**Next action:** Plan Phase 8 (Demo & Visualization) or execute 08-01-PLAN.md
+**Phase 8 Status:**
+- 08-01: Metrics logger node - COMPLETE
+- 08-02: RViz config and launch updates - COMPLETE
+- 08-03: Scenario testing and analysis - NOT STARTED
+
+**Next action:** Execute 08-03-PLAN.md (scenario testing)
 
 Resume file: None

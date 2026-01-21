@@ -167,8 +167,8 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 08-01: Metrics logger and plotting scripts
-- [ ] 08-02: RViz configuration and launch file
+- [x] 08-01: Metrics logger and plotting scripts
+- [x] 08-02: RViz configuration and launch file
 - [ ] 08-03: Run scenarios and generate results
 
 ## Progress
@@ -185,4 +185,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 5. Demo | v1.0 | 1/1 | Complete | 2026-01-20 |
 | 6. Sensor Foundation | v2.0 | 3/3 | Complete | 2026-01-21 |
 | 7. Navigation Filter | v2.0 | 3/3 | Complete | 2026-01-21 |
-| 8. Demo & Visualization | v2.0 | 0/3 | Not started | - |
+| 8. Demo & Visualization | v2.0 | 2/3 | In progress | - |
