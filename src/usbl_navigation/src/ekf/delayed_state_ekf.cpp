@@ -165,10 +165,12 @@ void DelayedStateEKF::updateDvl(const Eigen::Vector3d& velocity_body,
   // State update: x = x + K * y
   state_ += K * innovation;
 
-  // Covariance update: P = (I - K * H) * P
+  // Covariance update (Joseph form for numerical stability)
+  // P = (I - K * H) * P * (I - K * H)^T + K * R * K^T
   Eigen::Matrix<double, STATE_SIZE, STATE_SIZE> I =
       Eigen::Matrix<double, STATE_SIZE, STATE_SIZE>::Identity();
-  P_ = (I - K * H) * P_;
+  Eigen::Matrix<double, STATE_SIZE, STATE_SIZE> IKH = I - K * H;
+  P_ = IKH * P_ * IKH.transpose() + K * R * K.transpose();
 
   // Ensure quaternion normalization
   normalizeQuaternion();
@@ -181,50 +183,68 @@ bool DelayedStateEKF::updateUsblDelayed(const Eigen::Vector3d& position,
     return false;
   }
 
-  // Find buffered state at measurement time
+  // Step 1: Find buffered state at measurement time
   BufferedState buffered;
   if (!findBufferedState(meas_time, buffered)) {
-    return false;  // No suitable historical state found
+    // Measurement too old (not in buffer) - reject
+    RCLCPP_WARN(rclcpp::get_logger("DelayedStateEKF"),
+                "USBL measurement too old, rejecting");
+    return false;
   }
 
-  // Innovation using historical state
-  Eigen::Vector3d predicted_position = buffered.state.segment<3>(PX);
-  Eigen::Vector3d innovation = position - predicted_position;
+  // Step 2: Compute innovation using buffered state
+  Eigen::Vector3d z = position;
+  Eigen::Vector3d z_pred = buffered.state.segment<3>(PX);
+  Eigen::Vector3d y = z - z_pred;
 
-  // Measurement matrix H: observes position directly
+  // Step 3: Measurement matrix (position observation)
   Eigen::Matrix<double, 3, STATE_SIZE> H = Eigen::Matrix<double, 3, STATE_SIZE>::Zero();
   H(0, PX) = 1.0;
   H(1, PY) = 1.0;
   H(2, PZ) = 1.0;
 
-  // Innovation covariance using historical covariance
+  // Step 4: Innovation covariance
   Eigen::Matrix3d S = H * buffered.covariance * H.transpose() + R;
 
-  // Outlier rejection
-  double mahal_dist = computeMahalanobisDistance(innovation, S);
-  if (mahal_dist > mahalanobis_threshold_) {
-    return false;  // Reject outlier
+  // Step 5: Mahalanobis distance for outlier rejection
+  double mahal_dist_sq = computeMahalanobisDistance(y, S);
+  if (mahal_dist_sq > mahalanobis_threshold_) {
+    // Outlier detected - reject measurement
+    RCLCPP_WARN(rclcpp::get_logger("DelayedStateEKF"),
+                "USBL outlier rejected: Mahalanobis^2=%.1f > threshold=%.1f",
+                mahal_dist_sq, mahalanobis_threshold_);
+    return false;
   }
 
-  // Kalman gain
+  // Step 6: Kalman gain using buffered covariance
   Eigen::Matrix<double, STATE_SIZE, 3> K =
       buffered.covariance * H.transpose() * S.inverse();
 
-  // Update historical state
-  buffered.state += K * innovation;
+  // Step 7: Update buffered state (at measurement time)
+  Eigen::Matrix<double, STATE_SIZE, 1> state_corrected = buffered.state + K * y;
+
+  // Normalize quaternion in corrected state
+  Eigen::Quaterniond q_corr(state_corrected(QW), state_corrected(QX),
+                            state_corrected(QY), state_corrected(QZ));
+  q_corr.normalize();
+  state_corrected(QW) = q_corr.w();
+  state_corrected(QX) = q_corr.x();
+  state_corrected(QY) = q_corr.y();
+  state_corrected(QZ) = q_corr.z();
+
+  // Update covariance at measurement time (Joseph form for numerical stability)
   Eigen::Matrix<double, STATE_SIZE, STATE_SIZE> I =
       Eigen::Matrix<double, STATE_SIZE, STATE_SIZE>::Identity();
-  buffered.covariance = (I - K * H) * buffered.covariance;
+  Eigen::Matrix<double, STATE_SIZE, STATE_SIZE> IKH = I - K * H;
+  Eigen::Matrix<double, STATE_SIZE, STATE_SIZE> P_corrected =
+      IKH * buffered.covariance * IKH.transpose() + K * R * K.transpose();
 
-  // Set current state to corrected historical state
-  state_ = buffered.state;
-  P_ = buffered.covariance;
+  // Step 8: Repropagate from corrected state to current time
+  repropagateFrom(meas_time, state_corrected, P_corrected);
 
-  // Normalize quaternion after correction
-  normalizeQuaternion();
-
-  // Repropagate from measurement time to current time
-  repropagateFrom(meas_time);
+  RCLCPP_DEBUG(rclcpp::get_logger("DelayedStateEKF"),
+               "USBL update applied: innovation=[%.2f, %.2f, %.2f]m",
+               y(0), y(1), y(2));
 
   return true;
 }
@@ -344,68 +364,119 @@ bool DelayedStateEKF::findBufferedState(const rclcpp::Time& time, BufferedState&
   return found;
 }
 
-void DelayedStateEKF::repropagateFrom(const rclcpp::Time& from_time) {
-  // Find IMU measurements after from_time and replay them
-  for (const auto& imu : imu_buffer_) {
-    if (imu.timestamp > from_time) {
-      // Find next IMU measurement to calculate dt
-      double dt = 0.01;  // Default to 100Hz if can't determine
+void DelayedStateEKF::repropagateFrom(
+    const rclcpp::Time& from_time,
+    const Eigen::Matrix<double, STATE_SIZE, 1>& corrected_state,
+    const Eigen::Matrix<double, STATE_SIZE, STATE_SIZE>& corrected_cov) {
+  // Set state to corrected values
+  state_ = corrected_state;
+  P_ = corrected_cov;
 
-      // Look ahead to find next measurement for dt calculation
-      auto it = std::find_if(imu_buffer_.begin(), imu_buffer_.end(),
-                             [&imu](const ImuMeasurement& m) {
-                               return m.timestamp > imu.timestamp;
-                             });
-      if (it != imu_buffer_.end()) {
-        dt = (it->timestamp - imu.timestamp).seconds();
-      }
-
-      // Replay prediction (but don't store in buffer again)
-      // Use direct state update without buffer storage
-
-      // Bias-corrected measurements
-      Eigen::Vector3d gyro = imu.gyro - state_.segment<3>(BGX);
-      Eigen::Vector3d accel = imu.accel - state_.segment<3>(BAX);
-
-      // Extract current quaternion
-      Eigen::Quaterniond q(state_(QW), state_(QX), state_(QY), state_(QZ));
-      q.normalize();
-
-      // Orientation update
-      double angle = gyro.norm() * dt;
-      Eigen::Quaterniond dq;
-      if (angle > 1e-10) {
-        Eigen::Vector3d axis = gyro.normalized();
-        dq = Eigen::Quaterniond(Eigen::AngleAxisd(angle, axis));
-      } else {
-        dq = Eigen::Quaterniond::Identity();
-      }
-      q = q * dq;
-      q.normalize();
-
-      // Acceleration in NED frame
-      Eigen::Matrix3d R = q.toRotationMatrix();
-      Eigen::Vector3d accel_ned = R * accel;
-      Eigen::Vector3d gravity(0.0, 0.0, GRAVITY);
-      Eigen::Vector3d accel_corrected = accel_ned - gravity;
-
-      // State updates
-      state_.segment<3>(VX) += accel_corrected * dt;
-      state_.segment<3>(PX) += state_.segment<3>(VX) * dt;
-      state_(QW) = q.w();
-      state_(QX) = q.x();
-      state_(QY) = q.y();
-      state_(QZ) = q.z();
-
-      // Covariance update
-      Eigen::Matrix<double, STATE_SIZE, STATE_SIZE> F =
-          computeStateTransitionJacobian(gyro, accel, q, dt);
-      Eigen::Matrix<double, STATE_SIZE, STATE_SIZE> Q_dt = buildProcessNoiseMatrix(dt);
-      P_ = F * P_ * F.transpose() + Q_dt;
-
-      normalizeQuaternion();
-    }
+  // Clear state buffer entries after correction time (they're now invalid)
+  while (!state_buffer_.empty() && state_buffer_.back().timestamp > from_time) {
+    state_buffer_.pop_back();
   }
+
+  // Replay IMU measurements from correction time to current time
+  rclcpp::Time prev_time = from_time;
+  for (const auto& imu : imu_buffer_) {
+    if (imu.timestamp <= from_time) {
+      continue;  // Skip IMU measurements before correction time
+    }
+
+    // Calculate dt from previous measurement time
+    double dt = (imu.timestamp - prev_time).seconds();
+    if (dt <= 0 || dt >= 1.0) {
+      continue;  // Skip invalid time steps
+    }
+
+    // Run prediction and rebuild state buffer
+    predictInternal(imu, dt);
+    storeState(imu.timestamp);
+
+    prev_time = imu.timestamp;
+  }
+}
+
+void DelayedStateEKF::repropagateFrom(const rclcpp::Time& from_time) {
+  // Overload for backward compatibility - uses current state/covariance
+  // This version is used when state_ and P_ are already set to corrected values
+
+  // Clear state buffer entries after correction time (they're now invalid)
+  while (!state_buffer_.empty() && state_buffer_.back().timestamp > from_time) {
+    state_buffer_.pop_back();
+  }
+
+  // Replay IMU measurements from correction time to current time
+  rclcpp::Time prev_time = from_time;
+  for (const auto& imu : imu_buffer_) {
+    if (imu.timestamp <= from_time) {
+      continue;  // Skip IMU measurements before correction time
+    }
+
+    // Calculate dt from previous measurement time
+    double dt = (imu.timestamp - prev_time).seconds();
+    if (dt <= 0 || dt >= 1.0) {
+      continue;  // Skip invalid time steps
+    }
+
+    // Run prediction and rebuild state buffer
+    predictInternal(imu, dt);
+    storeState(imu.timestamp);
+
+    prev_time = imu.timestamp;
+  }
+}
+
+void DelayedStateEKF::predictInternal(const ImuMeasurement& imu, double dt) {
+  // Core prediction logic without IMU buffer update (used by repropagation)
+
+  // Bias-corrected measurements
+  Eigen::Vector3d gyro = imu.gyro - state_.segment<3>(BGX);
+  Eigen::Vector3d accel = imu.accel - state_.segment<3>(BAX);
+
+  // Extract current quaternion
+  Eigen::Quaterniond q(state_(QW), state_(QX), state_(QY), state_(QZ));
+  q.normalize();
+
+  // Orientation update (first-order quaternion integration)
+  double angle = gyro.norm() * dt;
+  Eigen::Quaterniond dq;
+  if (angle > 1e-10) {
+    Eigen::Vector3d axis = gyro.normalized();
+    dq = Eigen::Quaterniond(Eigen::AngleAxisd(angle, axis));
+  } else {
+    dq = Eigen::Quaterniond::Identity();
+  }
+  q = q * dq;
+  q.normalize();
+
+  // Rotate acceleration to NED frame and remove gravity
+  Eigen::Matrix3d R = q.toRotationMatrix();
+  Eigen::Vector3d accel_ned = R * accel;
+  Eigen::Vector3d gravity(0.0, 0.0, GRAVITY);
+  Eigen::Vector3d accel_corrected = accel_ned - gravity;
+
+  // Velocity update (NED frame)
+  state_.segment<3>(VX) += accel_corrected * dt;
+
+  // Position update (NED frame)
+  state_.segment<3>(PX) += state_.segment<3>(VX) * dt;
+
+  // Update quaternion in state
+  state_(QW) = q.w();
+  state_(QX) = q.x();
+  state_(QY) = q.y();
+  state_(QZ) = q.z();
+
+  // Covariance prediction: P = F * P * F^T + Q
+  Eigen::Matrix<double, STATE_SIZE, STATE_SIZE> F =
+      computeStateTransitionJacobian(gyro, accel, q, dt);
+  Eigen::Matrix<double, STATE_SIZE, STATE_SIZE> Q_dt = buildProcessNoiseMatrix(dt);
+  P_ = F * P_ * F.transpose() + Q_dt;
+
+  // Ensure quaternion normalization
+  normalizeQuaternion();
 }
 
 void DelayedStateEKF::trimImuBuffer() {
