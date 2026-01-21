@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 ## Current Position
 
 Phase: 6 of 8 (Sensor Foundation)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In progress
-Last activity: 2026-01-21 — Completed 06-01-PLAN.md
+Last activity: 2026-01-21 — Completed 06-02-PLAN.md
 
-Progress: ██████████████████░░░░░░░░░░░░ 64% (14 of 22 plans)
+Progress: ████████████████████░░░░░░░░░░ 68% (15 of 22 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14 (13 v1.0 + 1 v2.0)
+- Total plans completed: 15 (13 v1.0 + 2 v2.0)
 - Average duration: ~7min
-- Total execution time: ~96 min
+- Total execution time: ~100 min
 
 **By Phase:**
 
@@ -32,7 +32,7 @@ Progress: ██████████████████░░░░░�
 | 03-control | v1.0 | 3/3 | Complete |
 | 04-planning | v1.0 | 3/3 | Complete |
 | 05-demo | v1.0 | 1/1 | Complete |
-| 06-sensor-foundation | v2.0 | 1/3 | In progress |
+| 06-sensor-foundation | v2.0 | 2/3 | In progress |
 | 07-navigation-filter | v2.0 | 0/3 | Not started |
 | 08-demo-visualization | v2.0 | 0/3 | Not started |
 
@@ -51,6 +51,8 @@ Recent decisions affecting current work:
 | v2.0 | 15-state vector | pos(3), vel(3), quat(4), gyro_bias(3), accel_bias(3) |
 | 06-01 | NED coordinate convention | Standard for marine robotics, +X North +Y East +Z Down |
 | 06-01 | Eigen for quaternions | Direct Eigen::Quaterniond instead of tf2 conversions |
+| 06-02 | Random walk bias model | Bias evolves as b += N(0,1) * instability * sqrt(dt) |
+| 06-02 | DVL world-to-body transform | DVL measures body-frame velocity, not world-frame |
 
 ### Pending Todos
 
@@ -63,7 +65,7 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-21
-Stopped at: Completed 06-01-PLAN.md
+Stopped at: Completed 06-02-PLAN.md
 
 **v1.0 Status:**
 - All 5 phases complete (13 plans)
@@ -71,9 +73,9 @@ Stopped at: Completed 06-01-PLAN.md
 
 **Phase 6 Status:**
 - 06-01: Package scaffolding + truth generator - COMPLETE
-- 06-02: IMU + DVL simulators - Pending
+- 06-02: IMU + DVL simulators - COMPLETE
 - 06-03: USBL simulator with delayed timestamps - Pending
 
-**Next action:** Execute 06-02-PLAN.md
+**Next action:** Execute 06-03-PLAN.md
 
 Resume file: None
