@@ -12,7 +12,7 @@ Build a complete AUV simulation demonstrating autonomous underwater navigation. 
 
 - [x] **Phase 1: Infrastructure** - Docker + Stonefish + ROS2 foundation
 - [x] **Phase 2: Navigation** - C++ EKF state estimator with sensor fusion
-- [ ] **Phase 3: Control** - C++ PID controllers for depth/heading/velocity
+- [x] **Phase 3: Control** - C++ PID controllers for depth/heading/velocity
 - [ ] **Phase 4: Planning** - Python mission planner + state machine
 - [ ] **Phase 5: Demo** - Full vertical slice mission integration
 
@@ -70,7 +70,7 @@ Plans:
 Plans:
 - [x] 03-01: Control package foundation (PID class, control node skeleton)
 - [x] 03-02: Depth and heading controllers
-- [ ] 03-03: Velocity controller and launch file
+- [x] 03-03: Launch file and controller verification
 
 ### Phase 4: Planning
 **Goal**: Python mission planner with state machine for autonomous behavior
@@ -86,7 +86,9 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 04-01: TBD
+- [ ] 04-01: Mission planner package foundation (waypoints, navigation utils)
+- [ ] 04-02: State machine and planner node
+- [ ] 04-03: Integration and verification
 
 ### Phase 5: Demo
 **Goal**: Full vertical slice — autonomous dive→waypoint→surface mission
@@ -112,6 +114,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Infrastructure | 2/2 | Complete | 2026-01-17 |
 | 2. Navigation | 4/4 | Complete | 2026-01-17 |
-| 3. Control | 2/3 | In progress | - |
-| 4. Planning | 0/TBD | Not started | - |
+| 3. Control | 3/3 | Complete | 2026-01-20 |
+| 4. Planning | 0/3 | Not started | - |
 | 5. Demo | 0/TBD | Not started | - |
