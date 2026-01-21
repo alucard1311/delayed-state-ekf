@@ -1,0 +1,14 @@
+# Mission waypoint configuration
+# Coordinates in meters, depth positive down
+
+mission:
+  name: "demo_mission"
+  arrival_radius: 1.0  # meters, horizontal
+  depth_tolerance: 0.5  # meters, vertical
+  cruise_velocity: 0.3  # m/s
+  cruise_depth: 3.0  # meters
+
+waypoints:
+  - {x: 5.0, y: 0.0, depth: 3.0, name: "WP1"}
+  - {x: 5.0, y: 5.0, depth: 3.0, name: "WP2"}
+  - {x: 0.0, y: 5.0, depth: 3.0, name: "WP3"}
