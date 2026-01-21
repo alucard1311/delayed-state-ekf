@@ -154,11 +154,28 @@ ament_target_dependencies(path_publisher_node
   nav_msgs
 )
 
+# Metrics logger node
+add_executable(metrics_logger_node
+  src/nodes/metrics_logger_node.cpp
+  src/nodes/metrics_logger_main.cpp
+)
+target_include_directories(metrics_logger_node PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+  ${EIGEN3_INCLUDE_DIRS}
+)
+ament_target_dependencies(metrics_logger_node
+  rclcpp
+  nav_msgs
+  message_filters
+)
+
 # Install targets
 install(TARGETS
   delayed_state_ekf
   navigation_node
   path_publisher_node
+  metrics_logger_node
   truth_generator_node
   imu_simulator_node
   dvl_simulator_node
