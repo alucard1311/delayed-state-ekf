@@ -49,15 +49,68 @@ ament_target_dependencies(truth_generator_node
   tf2_geometry_msgs
 )
 
+# IMU simulator node
+add_executable(imu_simulator_node
+  src/nodes/imu_simulator_node.cpp
+  src/nodes/imu_simulator_main.cpp
+)
+target_include_directories(imu_simulator_node PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+  ${EIGEN3_INCLUDE_DIRS}
+)
+ament_target_dependencies(imu_simulator_node
+  rclcpp
+  std_msgs
+  sensor_msgs
+  geometry_msgs
+  nav_msgs
+)
+
+# DVL simulator node
+add_executable(dvl_simulator_node
+  src/nodes/dvl_simulator_node.cpp
+  src/nodes/dvl_simulator_main.cpp
+)
+target_include_directories(dvl_simulator_node PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+  ${EIGEN3_INCLUDE_DIRS}
+)
+ament_target_dependencies(dvl_simulator_node
+  rclcpp
+  std_msgs
+  geometry_msgs
+  nav_msgs
+)
+
+# USBL simulator node
+add_executable(usbl_simulator_node
+  src/nodes/usbl_simulator_node.cpp
+  src/nodes/usbl_simulator_main.cpp
+)
+target_include_directories(usbl_simulator_node PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+  ${EIGEN3_INCLUDE_DIRS}
+)
+ament_target_dependencies(usbl_simulator_node
+  rclcpp
+  std_msgs
+  sensor_msgs
+  geometry_msgs
+  nav_msgs
+)
+
 # Future executables (commented out until implemented):
-# add_executable(imu_simulator_node src/nodes/imu_simulator_node.cpp)
-# add_executable(dvl_simulator_node src/nodes/dvl_simulator_node.cpp)
-# add_executable(usbl_simulator_node src/nodes/usbl_simulator_node.cpp)
 # add_executable(navigation_filter_node src/nodes/navigation_filter_node.cpp)
 
 # Install targets
 install(TARGETS
   truth_generator_node
+  imu_simulator_node
+  dvl_simulator_node
+  usbl_simulator_node
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}

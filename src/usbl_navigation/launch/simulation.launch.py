@@ -48,30 +48,30 @@ def generate_launch_description():
         parameters=[simulation_params],
     )
 
+    # IMU simulator node
+    imu_simulator_node = Node(
+        package='usbl_navigation',
+        executable='imu_simulator_node',
+        name='imu_simulator',
+        output='screen',
+        parameters=[simulation_params, sensor_noise_params],
+    )
+
+    # DVL simulator node
+    dvl_simulator_node = Node(
+        package='usbl_navigation',
+        executable='dvl_simulator_node',
+        name='dvl_simulator',
+        output='screen',
+        parameters=[
+            simulation_params,
+            sensor_noise_params,
+            {'enable_canyon_dropout': LaunchConfiguration('enable_canyon_dropout')},
+        ],
+    )
+
     # Future nodes (commented out until implemented):
     # --------------------------------------------------------------------------
-
-    # IMU simulator node (Plan 06-02)
-    # imu_simulator_node = Node(
-    #     package='usbl_navigation',
-    #     executable='imu_simulator_node',
-    #     name='imu_simulator',
-    #     output='screen',
-    #     parameters=[simulation_params, sensor_noise_params],
-    # )
-
-    # DVL simulator node (Plan 06-02)
-    # dvl_simulator_node = Node(
-    #     package='usbl_navigation',
-    #     executable='dvl_simulator_node',
-    #     name='dvl_simulator',
-    #     output='screen',
-    #     parameters=[
-    #         simulation_params,
-    #         sensor_noise_params,
-    #         {'enable_canyon_dropout': LaunchConfiguration('enable_canyon_dropout')},
-    #     ],
-    # )
 
     # USBL simulator node (Plan 06-03)
     # usbl_simulator_node = Node(
@@ -112,8 +112,8 @@ def generate_launch_description():
         output_dir_arg,
         # Nodes
         truth_generator_node,
-        # imu_simulator_node,      # Plan 06-02
-        # dvl_simulator_node,      # Plan 06-02
+        imu_simulator_node,
+        dvl_simulator_node,
         # usbl_simulator_node,     # Plan 06-03
         # navigation_filter_node,  # Phase 7
         # metrics_logger_node,     # Phase 8
