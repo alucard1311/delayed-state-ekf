@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-17)
 
 **Core value:** Full vertical slice — one complete mission (dive → waypoint → surface) with all layers working
-**Current focus:** Phase 3 in progress — Control package foundation complete
+**Current focus:** Phase 4 complete — Python mission planner + state machine implemented
 
 ## Current Position
 
-Phase: 3 of 5 (Control)
-Plan: 2 of 3 in current phase
-Status: In progress
-Last activity: 2026-01-18 — Completed 03-02-PLAN.md (PID controllers implementation)
+Phase: 4 of 5 (Planning)
+Plan: 2 of 2 in current phase
+Status: Phase 04 complete
+Last activity: 2026-01-20 — Completed plan 04-02 (state machine and planner node)
 
-Progress: ████████████████████████ 80% (8 of 10 plans)
+Progress: ██████████████████████████████ 100% (12 of 12 plans estimated)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
+- Total plans completed: 12
 - Average duration: ~7min
-- Total execution time: ~57 min
+- Total execution time: ~84 min
 
 **By Phase:**
 
@@ -29,7 +29,8 @@ Progress: ███████████████████████�
 |-------|-------|-------|--------|
 | 01-infrastructure | 2/2 | ~30min | Complete |
 | 02-navigation | 4/4 | ~23min | Complete |
-| 03-control | 2/3 | ~4min | In progress |
+| 03-control | 3/3 | ~10min | Complete |
+| 04-planning | 2/2 | ~14min | Complete |
 
 ## Accumulated Context
 
@@ -62,6 +63,14 @@ Recent decisions affecting current work:
 | 03-02 | Angle wrapping for heading | Prevents 270-degree spins on ±pi discontinuity |
 | 03-02 | Same command to bow/stern yaw | Stern is inverted in auv.xml |
 | 03-02 | dt validation in control loop | Skip if dt <= 0 or > 1.0 to avoid PID spikes |
+| 04-01 | Pure functions in navigation_utils | No ROS deps, easy to unit test |
+| 04-01 | Dataclass for Waypoint | Clean, immutable data structure |
+| 04-01 | YAML for mission config | Human-readable, standard ROS pattern |
+| 04-01 | Heading convention: 0=+X, pi/2=+Y | Matches atan2(dy, dx) standard |
+| 04-02 | Auto-start on EKF data | Simpler operation, no manual trigger needed |
+| 04-02 | ERROR triggers safe surfacing | Safety-first design |
+| 04-02 | State published as String | Human-readable monitoring |
+| 04-02 | Quaternion yaw extraction inline | Avoid external dependency |
 
 ### Pending Todos
 
@@ -69,11 +78,32 @@ None.
 
 ### Blockers/Concerns
 
-None — Control foundation ready for controller implementation.
+None.
 
 ## Session Continuity
 
-Last session: 2026-01-18
-Stopped at: Completed 03-02-PLAN.md (PID controllers implementation)
+Last session: 2026-01-20
+Stopped at: Plan 04-02 complete, Phase 04 complete
+
+**Plan 04-02 artifacts:**
+- src/auv_planner/auv_planner/state_machine.py - MissionStateMachine with all states
+- src/auv_planner/auv_planner/planner_node.py - ROS2 planner node
+- src/auv_planner/launch/planner.launch.py - Launch file with configurable parameters
+
+**State machine states:**
+- IDLE -> DIVING -> NAVIGATING -> SURFACING -> COMPLETE
+- ERROR state triggers safe surfacing
+
+**Planner node interfaces:**
+- Subscribes: `/auv/ekf/pose` (nav_msgs/Odometry)
+- Publishes: `/auv/cmd/depth`, `/auv/cmd/heading`, `/auv/cmd/velocity` (std_msgs/Float64)
+- Publishes: `/auv/mission/state` (std_msgs/String)
+
+**Files modified (uncommitted from Phase 3):**
+- src/auv_sim/description/auv.xml (material density, world_transform position)
+- src/auv_control/src/control_node.cpp (depth/heave sign fixes)
+- src/auv_ekf/src/ekf_node.cpp (uncommitted changes)
+- src/auv_sim/launch/full_simulation.launch.py (new - full stack launcher)
+
 Resume file: None
-Next action: Execute 03-03-PLAN.md (Velocity controller and launch file)
+Next action: Phase 05 (Integration) or full system testing
