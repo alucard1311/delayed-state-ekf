@@ -146,7 +146,7 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 07-01: State buffer and EKF prediction
+- [x] 07-01: State buffer and EKF prediction
 - [ ] 07-02: DVL and USBL measurement updates
 - [ ] 07-03: Navigation node and integration
 
@@ -184,5 +184,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 4. Planning | v1.0 | 3/3 | Complete | 2026-01-20 |
 | 5. Demo | v1.0 | 1/1 | Complete | 2026-01-20 |
 | 6. Sensor Foundation | v2.0 | 3/3 | Complete | 2026-01-21 |
-| 7. Navigation Filter | v2.0 | 0/3 | Not started | - |
+| 7. Navigation Filter | v2.0 | 1/3 | In progress | - |
 | 8. Demo & Visualization | v2.0 | 0/3 | Not started | - |
