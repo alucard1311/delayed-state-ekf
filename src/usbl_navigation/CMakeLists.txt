@@ -20,6 +20,7 @@ find_package(nav_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
+find_package(message_filters REQUIRED)
 find_package(Eigen3 REQUIRED)
 
 # Include directories
@@ -137,10 +138,27 @@ ament_target_dependencies(navigation_node
   tf2_ros
 )
 
+# Path publisher node
+add_executable(path_publisher_node
+  src/nodes/path_publisher_node.cpp
+  src/nodes/path_publisher_main.cpp
+)
+target_include_directories(path_publisher_node PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+  ${EIGEN3_INCLUDE_DIRS}
+)
+ament_target_dependencies(path_publisher_node
+  rclcpp
+  geometry_msgs
+  nav_msgs
+)
+
 # Install targets
 install(TARGETS
   delayed_state_ekf
   navigation_node
+  path_publisher_node
   truth_generator_node
   imu_simulator_node
   dvl_simulator_node
