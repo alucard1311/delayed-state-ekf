@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-20)
 
 **Core value:** Delayed-state EKF fusion with USBL — the key technique for real underwater navigation
-**Current focus:** Phase 6 — Sensor Foundation
+**Current focus:** Phase 7 — Navigation Filter
 
 ## Current Position
 
 Phase: 6 of 8 (Sensor Foundation)
-Plan: 2 of 3 in current phase
-Status: In progress
-Last activity: 2026-01-21 — Completed 06-02-PLAN.md
+Plan: 3 of 3 in current phase
+Status: Phase complete
+Last activity: 2026-01-21 — Completed 06-03-PLAN.md
 
-Progress: ████████████████████░░░░░░░░░░ 68% (15 of 22 plans)
+Progress: ██████████████████████░░░░░░░░ 73% (16 of 22 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15 (13 v1.0 + 2 v2.0)
+- Total plans completed: 16 (13 v1.0 + 3 v2.0)
 - Average duration: ~7min
-- Total execution time: ~100 min
+- Total execution time: ~106 min
 
 **By Phase:**
 
@@ -32,7 +32,7 @@ Progress: ████████████████████░░░�
 | 03-control | v1.0 | 3/3 | Complete |
 | 04-planning | v1.0 | 3/3 | Complete |
 | 05-demo | v1.0 | 1/1 | Complete |
-| 06-sensor-foundation | v2.0 | 2/3 | In progress |
+| 06-sensor-foundation | v2.0 | 3/3 | Complete |
 | 07-navigation-filter | v2.0 | 0/3 | Not started |
 | 08-demo-visualization | v2.0 | 0/3 | Not started |
 
@@ -53,6 +53,8 @@ Recent decisions affecting current work:
 | 06-01 | Eigen for quaternions | Direct Eigen::Quaterniond instead of tf2 conversions |
 | 06-02 | Random walk bias model | Bias evolves as b += N(0,1) * instability * sqrt(dt) |
 | 06-02 | DVL world-to-body transform | DVL measures body-frame velocity, not world-frame |
+| 06-03 | USBL delayed timestamps | measurement_time = now() - delay, not current time |
+| 06-03 | Range-dependent noise | max(2% * range, 0.3m) per axis |
 
 ### Pending Todos
 
@@ -65,7 +67,7 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-21
-Stopped at: Completed 06-02-PLAN.md
+Stopped at: Completed 06-03-PLAN.md
 
 **v1.0 Status:**
 - All 5 phases complete (13 plans)
@@ -74,8 +76,8 @@ Stopped at: Completed 06-02-PLAN.md
 **Phase 6 Status:**
 - 06-01: Package scaffolding + truth generator - COMPLETE
 - 06-02: IMU + DVL simulators - COMPLETE
-- 06-03: USBL simulator with delayed timestamps - Pending
+- 06-03: USBL simulator with delayed timestamps - COMPLETE
 
-**Next action:** Execute 06-03-PLAN.md
+**Next action:** Plan Phase 7 (Navigation Filter)
 
 Resume file: None
