@@ -115,12 +115,32 @@ ament_target_dependencies(usbl_simulator_node
   nav_msgs
 )
 
-# Future executables (commented out until implemented):
-# add_executable(navigation_filter_node src/nodes/navigation_filter_node.cpp)
+# Navigation node
+add_executable(navigation_node
+  src/nodes/navigation_node.cpp
+  src/nodes/navigation_main.cpp
+)
+target_include_directories(navigation_node PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+  ${EIGEN3_INCLUDE_DIRS}
+)
+target_link_libraries(navigation_node
+  delayed_state_ekf
+)
+ament_target_dependencies(navigation_node
+  rclcpp
+  sensor_msgs
+  geometry_msgs
+  nav_msgs
+  std_msgs
+  tf2_ros
+)
 
 # Install targets
 install(TARGETS
   delayed_state_ekf
+  navigation_node
   truth_generator_node
   imu_simulator_node
   dvl_simulator_node
