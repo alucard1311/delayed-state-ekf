@@ -22,25 +22,51 @@ A naive EKF that treats delayed measurements as current will produce incorrect s
 ## Results
 
 ### Position Error (Sawtooth Pattern)
-The characteristic sawtooth shows error growing during dead reckoning (IMU+DVL), then dropping sharply when a USBL fix arrives:
+The characteristic sawtooth shows error growing during dead reckoning (IMU+DVL), then dropping sharply when a USBL fix arrives. This is the signature behavior of a properly functioning delayed-state EKF with intermittent absolute position updates.
 
-```
-Error
-(m)
- 5 |    /\      /\      /\
- 4 |   /  \    /  \    /  \
- 3 |  /    \  /    \  /    \
- 2 | /      \/      \/      \
- 1 |/                        \____
-   +------------------------------- Time
-        USBL fixes (every ~2-5s)
-```
+![Position Error Sawtooth](docs/images/error_sawtooth.png)
+
+**Key observations:**
+- Error accumulates during IMU+DVL dead reckoning periods
+- Sharp drops correspond to USBL position fixes being applied
+- Error bounded despite sensor noise and bias drift
+
+---
 
 ### Trajectory Tracking
-The filter successfully tracks a lawnmower survey pattern, with the estimate (orange) closely following ground truth (blue).
+The filter successfully tracks the lawnmower survey pattern. The estimate (orange) closely follows ground truth (blue), demonstrating accurate state estimation even with delayed USBL measurements.
 
-### Covariance Consistency
-Position errors remain within the 3-sigma bounds predicted by the filter covariance, indicating a well-tuned estimator.
+![Trajectory Comparison](docs/images/trajectory.png)
+
+**Key observations:**
+- Estimate tracks truth throughout the survey pattern
+- No significant divergence during turns
+- USBL corrections keep long-term drift bounded
+
+---
+
+### Covariance Consistency (3-Sigma Bounds)
+Position errors remain within the 3-sigma bounds predicted by the filter covariance, indicating a **well-tuned and consistent estimator**. This is critical for real-world applications where the covariance is used for decision-making.
+
+![Covariance Bounds](docs/images/covariance_bounds.png)
+
+**Key observations:**
+- Actual error (blue line) stays within ±3σ bounds (shaded region)
+- Covariance grows during dead reckoning, shrinks after USBL updates
+- Filter is neither overconfident nor overly conservative
+
+---
+
+### Performance Summary
+
+| Metric | Value |
+|--------|-------|
+| Final Position Error | < 2m |
+| Maximum Position Error | < 5m |
+| USBL Update Rate | 0.5 Hz |
+| IMU Rate | 100 Hz |
+| DVL Rate | 5 Hz |
+| Navigation Output | 50 Hz |
 
 ## Architecture
 
@@ -240,15 +266,6 @@ x = [p_x, p_y, p_z,           # Position (NED frame)
      b_gx, b_gy, b_gz,        # Gyroscope bias
      b_ax, b_ay, b_az]        # Accelerometer bias
 ```
-
-## Performance
-
-| Metric | Nominal Scenario |
-|--------|------------------|
-| Final Position Error | < 2m |
-| Max Position Error | < 5m |
-| USBL Update Rate | 0.5 Hz |
-| Navigation Output | 50 Hz |
 
 ## Related Work
 
