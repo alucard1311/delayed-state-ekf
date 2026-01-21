@@ -26,4 +26,4 @@
       outlier_probability: 0.05       # 5%
       outlier_offset: 5.0             # meters
       ship_position: [50.0, 25.0, 0.0]  # NED (surface)
-      publish_rate: 0.2               # Hz (5 second period)
+      publish_rate: 0.5               # Hz (2 second period) - increased for better convergence

@@ -26,7 +26,7 @@ namespace usbl_navigation {
  * offline analysis and plotting.
  *
  * Subscriptions:
- * - /truth (nav_msgs/Odometry) - Ground truth from truth generator
+ * - /truth/odometry (nav_msgs/Odometry) - Ground truth from truth generator
  * - /navigation/odometry (nav_msgs/Odometry) - EKF navigation estimate
  *
  * Output:

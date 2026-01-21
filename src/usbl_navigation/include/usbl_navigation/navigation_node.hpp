@@ -6,7 +6,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/imu.hpp>
-#include <geometry_msgs/msg/twist_stamped.hpp>
+#include <geometry_msgs/msg/twist_with_covariance_stamped.hpp>
 #include <geometry_msgs/msg/point_stamped.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 #include <std_msgs/msg/bool.hpp>
@@ -25,7 +25,7 @@ namespace usbl_navigation {
  *
  * Subscriptions:
  * - /imu/data (sensor_msgs/Imu, 100Hz) - IMU angular velocity and acceleration
- * - /dvl/twist (geometry_msgs/TwistStamped, 5Hz) - DVL body-frame velocity
+ * - /dvl/twist (geometry_msgs/TwistWithCovarianceStamped, 5Hz) - DVL body-frame velocity
  * - /dvl/bottom_lock (std_msgs/Bool, 5Hz) - DVL validity flag
  * - /usbl/position (geometry_msgs/PointStamped, 0.2Hz) - USBL position fix
  * - /usbl/valid (std_msgs/Bool, 0.2Hz) - USBL validity flag
@@ -43,7 +43,7 @@ public:
 private:
   // Sensor callbacks
   void imuCallback(const sensor_msgs::msg::Imu::SharedPtr msg);
-  void dvlCallback(const geometry_msgs::msg::TwistStamped::SharedPtr msg);
+  void dvlCallback(const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg);
   void dvlValidCallback(const std_msgs::msg::Bool::SharedPtr msg);
   void usblCallback(const geometry_msgs::msg::PointStamped::SharedPtr msg);
   void usblValidCallback(const std_msgs::msg::Bool::SharedPtr msg);
@@ -61,7 +61,7 @@ private:
 
   // Subscribers
   rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_sub_;
-  rclcpp::Subscription<geometry_msgs::msg::TwistStamped>::SharedPtr dvl_sub_;
+  rclcpp::Subscription<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr dvl_sub_;
   rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr dvl_valid_sub_;
   rclcpp::Subscription<geometry_msgs::msg::PointStamped>::SharedPtr usbl_sub_;
   rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr usbl_valid_sub_;

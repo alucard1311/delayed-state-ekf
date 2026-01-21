@@ -18,7 +18,7 @@ MetricsLoggerNode::MetricsLoggerNode(const rclcpp::NodeOptions& options)
 
   // Create message filter subscribers
   truth_sub_ = std::make_shared<message_filters::Subscriber<OdometryMsg>>(
-    this, "/truth", rmw_qos_profile_sensor_data);
+    this, "/truth/odometry", rmw_qos_profile_sensor_data);
 
   estimate_sub_ = std::make_shared<message_filters::Subscriber<OdometryMsg>>(
     this, "/navigation/odometry", rmw_qos_profile_sensor_data);

@@ -25,11 +25,11 @@ DelayedStateEKF::DelayedStateEKF()
   // Initialize quaternion to identity (w=1, x=y=z=0)
   state_(QW) = 1.0;
 
-  // Initialize covariance with reasonable initial uncertainties
-  // Position uncertainty: 1.0 m
-  P_(PX, PX) = 1.0;
-  P_(PY, PY) = 1.0;
-  P_(PZ, PZ) = 1.0;
+  // Initialize covariance with large initial uncertainties
+  // Position uncertainty: 100m - allows USBL to bootstrap from unknown initial position
+  P_(PX, PX) = 10000.0;  // 100m std
+  P_(PY, PY) = 10000.0;
+  P_(PZ, PZ) = 10000.0;
 
   // Velocity uncertainty: 0.5 m/s
   P_(VX, VX) = 0.25;
@@ -292,9 +292,9 @@ void DelayedStateEKF::reset() {
   state_(QW) = 1.0;  // Identity quaternion
 
   P_.setZero();
-  P_(PX, PX) = 1.0;
-  P_(PY, PY) = 1.0;
-  P_(PZ, PZ) = 1.0;
+  P_(PX, PX) = 10000.0;  // 100m std - allows USBL bootstrap
+  P_(PY, PY) = 10000.0;
+  P_(PZ, PZ) = 10000.0;
   P_(VX, VX) = 0.25;
   P_(VY, VY) = 0.25;
   P_(VZ, VZ) = 0.25;

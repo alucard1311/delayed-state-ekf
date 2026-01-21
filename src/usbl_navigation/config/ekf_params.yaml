@@ -4,15 +4,15 @@
       prediction_rate: 100.0
       state_buffer_size: 500
       max_usbl_delay: 3.0
-      mahalanobis_threshold: 9.21    # chi-squared 3DOF, 99%
+      mahalanobis_threshold: 100.0   # Very permissive for demo robustness
 
       process_noise:
-        position: 0.01
-        velocity: 0.1
-        orientation: 0.001
+        position: 0.1       # Increased to prevent covariance collapse
+        velocity: 0.5       # Increased for turns
+        orientation: 0.01   # Increased for turn handling
         gyro_bias: 0.0001
         accel_bias: 0.001
 
       measurement_noise:
-        usbl_position: 1.0
+        usbl_position: 2.0  # More conservative USBL trust
         dvl_velocity: 0.05

@@ -44,7 +44,7 @@ NavigationNode::NavigationNode(const rclcpp::NodeOptions& options)
       "/imu/data", 10,
       std::bind(&NavigationNode::imuCallback, this, std::placeholders::_1));
 
-  dvl_sub_ = this->create_subscription<geometry_msgs::msg::TwistStamped>(
+  dvl_sub_ = this->create_subscription<geometry_msgs::msg::TwistWithCovarianceStamped>(
       "/dvl/twist", 10,
       std::bind(&NavigationNode::dvlCallback, this, std::placeholders::_1));
 
@@ -116,14 +116,14 @@ void NavigationNode::imuCallback(const sensor_msgs::msg::Imu::SharedPtr msg) {
   last_imu_time_ = imu.timestamp;
 }
 
-void NavigationNode::dvlCallback(const geometry_msgs::msg::TwistStamped::SharedPtr msg) {
+void NavigationNode::dvlCallback(const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg) {
   if (!initialized_ || !dvl_valid_) {
     return;
   }
 
-  Eigen::Vector3d v_body(msg->twist.linear.x,
-                          msg->twist.linear.y,
-                          msg->twist.linear.z);
+  Eigen::Vector3d v_body(msg->twist.twist.linear.x,
+                          msg->twist.twist.linear.y,
+                          msg->twist.twist.linear.z);
 
   ekf_->updateDvl(v_body, R_dvl_);
 

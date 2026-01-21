@@ -121,7 +121,7 @@ def launch_setup(context, *args, **kwargs):
         name='truth_path_publisher',
         output='screen',
         parameters=[{
-            'input_topic': '/truth',
+            'input_topic': '/truth/odometry',
             'output_topic': '/truth_path',
             'frame_id': 'world',
             'max_points': 1000,
