@@ -28,6 +28,19 @@ include_directories(
   ${EIGEN3_INCLUDE_DIRS}
 )
 
+# Delayed-state EKF library
+add_library(delayed_state_ekf
+  src/ekf/delayed_state_ekf.cpp
+)
+target_include_directories(delayed_state_ekf PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+  ${EIGEN3_INCLUDE_DIRS}
+)
+ament_target_dependencies(delayed_state_ekf
+  rclcpp
+)
+
 # Truth generator node
 add_executable(truth_generator_node
   src/nodes/truth_generator_node.cpp
@@ -107,6 +120,7 @@ ament_target_dependencies(usbl_simulator_node
 
 # Install targets
 install(TARGETS
+  delayed_state_ekf
   truth_generator_node
   imu_simulator_node
   dvl_simulator_node
