@@ -79,21 +79,25 @@ def generate_launch_description():
         parameters=[simulation_params, sensor_noise_params],
     )
 
+    # EKF parameters
+    ekf_params = PathJoinSubstitution([
+        usbl_nav_share, 'config', 'ekf_params.yaml'
+    ])
+
+    # Navigation node (delayed-state EKF)
+    navigation_node = Node(
+        package='usbl_navigation',
+        executable='navigation_node',
+        name='navigation_node',
+        output='screen',
+        parameters=[
+            ekf_params,
+            sensor_noise_params,
+        ],
+    )
+
     # Future nodes (commented out until implemented):
     # --------------------------------------------------------------------------
-
-    # Navigation filter node (Phase 7)
-    # navigation_filter_node = Node(
-    #     package='usbl_navigation',
-    #     executable='navigation_filter_node',
-    #     name='navigation_filter',
-    #     output='screen',
-    #     parameters=[
-    #         simulation_params,
-    #         sensor_noise_params,
-    #         PathJoinSubstitution([usbl_nav_share, 'config', 'ekf_params.yaml']),
-    #     ],
-    # )
 
     # Metrics logger node (Phase 8)
     # metrics_logger_node = Node(
@@ -110,11 +114,12 @@ def generate_launch_description():
         # Arguments
         enable_canyon_dropout_arg,
         output_dir_arg,
-        # Nodes
+        # Sensor simulators
         truth_generator_node,
         imu_simulator_node,
         dvl_simulator_node,
         usbl_simulator_node,
-        # navigation_filter_node,  # Phase 7
+        # Navigation filter
+        navigation_node,
         # metrics_logger_node,     # Phase 8
     ])
